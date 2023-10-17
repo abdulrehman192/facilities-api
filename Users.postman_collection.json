@@ -1,0 +1,99 @@
+{
+	"info": {
+		"_postman_id": "06fc4b4f-009a-4620-925b-f480c8d14e55",
+		"name": "Users",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "27766073"
+	},
+	"item": [
+		{
+			"name": "create-user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\": \"123456sf\",\r\n    \"firstName\" : \"Ali\",\r\n    \"lastName\" : \"Raza\",\r\n    \"profileImageUrl\" : \"\",\r\n    \"city\" : \"Okara\",\r\n    \"country\" : \"Pakistan\",\r\n    \"phoneNumber\" : \"03089098067\",\r\n    \"email\" : \"mr.abdulrehman.ar@gmail.com\",\r\n    \"dateOfBirth\" : \"1997-01-18\",\r\n    \"gender\" : \"Male\",\r\n    \"height\" : 5.6,\r\n    \"nickName\" : \"Rehman\",\r\n    \"nationality\" : \"Pakistani\",\r\n    \"combatStyle\" : \"Boxer\",\r\n    \"totalWins\" : 6,\r\n    \"totalLosses\" : 2,\r\n    \"totalDraws\" : 0,\r\n    \"acheivements\" : \"\",\r\n    \"role\" : \"fighter\",\r\n    \"weightCategory\" : \"\",\r\n    \"teamOfClubName\" : \"Sultan\",\r\n    \"socialLinks\" : \"[]\",\r\n    \"imagesUrls\" : \"[]\",\r\n    \"orgnizationName\" : \"\",\r\n    \"orgnizationLogo\" : \"\",\r\n    \"orgnizationWebsiteLink\" : \"\",\r\n    \"orgnizationSocialLink\" : \"\",\r\n    \"certificate\" : \"\",\r\n    \"experience\" : \"\",\r\n    \"agencyName\" : \"\",\r\n    \"address\" : \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:3000/api/create-user"
+			},
+			"response": []
+		},
+		{
+			"name": "get-all-users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "localhost:3000/api/get-all-users"
+			},
+			"response": []
+		},
+		{
+			"name": "get-one-user-by-id",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "update-user",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\" : 1,\r\n    \"firstName\": \"Abdul\",\r\n    \"lastName\": \"Rahman\",\r\n    \"profileImageUrl\": \"\",\r\n    \"city\": \"Okara\",\r\n    \"country\": \"Pakistan\",\r\n    \"phoneNumber\": \"03089098067\",\r\n    \"email\": \"mr.abdulrehman.ar@gmail.com\",\r\n    \"dateOfBirth\": \"1997-01-18\",\r\n    \"gender\": \"Male\",\r\n    \"height\": 5.6,\r\n    \"nickName\": \"Rehman\",\r\n    \"nationality\": \"Pakistani\",\r\n    \"combatStyle\": \"Boxer\",\r\n    \"totalWins\": 6,\r\n    \"totalLosses\": 2,\r\n    \"totalDraws\": 0,\r\n    \"acheivements\": \"\",\r\n    \"role\": \"fighter\",\r\n    \"weightCategory\": \"\",\r\n    \"teamOfClubName\": \"Sultan\",\r\n    \"socialLinks\": \"[]\",\r\n    \"imagesUrls\": \"[]\",\r\n    \"orgnizationName\": \"\",\r\n    \"orgnizationLogo\": \"\",\r\n    \"orgnizationWebsiteLink\": \"\",\r\n    \"orgnizationSocialLink\": \"\",\r\n    \"certificate\": \"\",\r\n    \"experience\": \"\",\r\n    \"agencyName\": \"\",\r\n    \"address\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:3000/api/update-user"
+			},
+			"response": []
+		},
+		{
+			"name": "reset-password",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\" : \"123466\",\r\n    \"id\" : \"1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:3000/api/reset-password"
+			},
+			"response": []
+		},
+		{
+			"name": "delete-user",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\" : \"2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:3000/api/delete-user"
+			},
+			"response": []
+		}
+	]
+}
