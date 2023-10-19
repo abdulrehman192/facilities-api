@@ -8,7 +8,7 @@ module.exports = {
     createUser : (request, response) => 
     {
         const body = request.body;
-        create(request, (error, results)=> {
+        create(request, (error, result)=> {
             if(error)
             {
                 if(error.includes("exists"))
@@ -26,10 +26,39 @@ module.exports = {
                 }
             }
 
-            return response.status(200).json({
-                success : 1,
-                data : results
+            getUserByPhone(body, (error, results) => {
+                if(error)
+                {
+                    return response.status(500).json({
+                        success : 0,
+                        message : error
+                    });
+                }
+    
+                if(!results)
+                {
+                    return response.status(404).json(
+                        {
+                            success : 0,
+                            message : "User account not exists. Please signup first"
+                        }
+                    );
+                }
+                else
+                {
+                    const jsonToken = sign({result : results}, process.env.SECRET_KEY, {
+                        expiresIn : "1400h"
+                    });
+                    return response.json({
+                        success : 1,
+                        message : "successfully login",
+                        accessToken: jsonToken,
+                        data : results
+                    });
+                }
             });
+
+            
         });
     },
 
@@ -184,7 +213,7 @@ module.exports = {
                 return response.json({
                     success : 1,
                     message : "successfully login",
-                    token: jsonToken,
+                    accessToken: jsonToken,
                     data : results
                 });
             }
