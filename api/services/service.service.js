@@ -148,22 +148,7 @@ module.exports = {
         } );
     },
 
-
     getServices : (data, callback)=> {
-        pool.query("Select s.serviceId, categorySr, serviceCategoryId, categoryTitle, categoryImageUrl, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl   from one_off_services s inner join service_categories c on s.serviceCategoryId = c.categoryId",
-        [],
-            (error, result, fields) => {
-            if(error)
-            {
-                return callback(error);
-            }
-            return callback(null, result);
-            }
-        );
-    },
-
-
-    searchServices : (data, callback)=> {
         var query = "Select s.serviceId, categorySr, serviceCategoryId, categoryTitle, categoryImageUrl, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl   from one_off_services s inner join service_categories c on s.serviceCategoryId = c.categoryId";
         if(data.text)
         {
