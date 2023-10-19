@@ -64,7 +64,7 @@ const updateUploadIfImageUrl = (req, res, next) => {
   }
 };
 
-router.post("/create-sub-service", uploadIfImageUrl, createService);
+router.post("/create-sub-service", checkToken, uploadIfImageUrl, createService);
 router.patch("/update-sub-service", checkToken, updateUploadIfImageUrl, updateService);
 router.delete("/delete-sub-service", checkToken, deleteService);
 router.get("/get-all-sub-services", checkToken, getServices);

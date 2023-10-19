@@ -11,8 +11,8 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.subServiceCreateAt = now;
-        const baseUrl = ''; 
-        const fileUrls = req.files.map(file => `${baseUrl}/public/files/${file.originalname}`);
+        const baseUrl = process.env.BASE_URL;
+        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
         if(fileUrls.length > 0)
         {
             imageUrl = fileUrls[0];
@@ -61,8 +61,8 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.subServiceUpdateAt = now;
-        const baseUrl = ''; 
-        const fileUrls = req.files.map(file => `${baseUrl}/public/files/${file.originalname}`);
+        const baseUrl = process.env.BASE_URL;
+        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
         if(fileUrls.length > 0)
         {
             imageUrl = fileUrls[0];

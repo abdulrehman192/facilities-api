@@ -40,6 +40,7 @@ const uploadIfImageUrl = (req, res, next) => {
   }
 };
 
+
 router.post("/create-user", uploadIfImageUrl, createUser);
 router.patch("/update-user", checkToken, uploadIfImageUrl, updateUser);
 router.delete("/delete-user", checkToken, deleteUser);

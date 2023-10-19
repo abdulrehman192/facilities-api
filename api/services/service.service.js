@@ -28,8 +28,8 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.serviceCreateAt = now;
-        const baseUrl = ''; 
-        const fileUrls = req.files.map(file => `${baseUrl}/public/files/${file.originalname}`);
+        const baseUrl = process.env.BASE_URL;
+        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
         if(fileUrls.length > 0)
         {
             coverImageUrl = fileUrls[0];
@@ -68,7 +68,7 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.serviceUpdateAt = now;
-        const baseUrl = ''; 
+        const baseUrl = process.env.BASE_URL;
         if(req.files.length > 0)
         {   
             var files = req.files;
@@ -76,7 +76,7 @@ module.exports = {
             
                 if(obj.fieldname === 'serviceCoverImageUrl')
                 {
-                    coverImageUrl = `${baseUrl}/public/files/${obj.originalname}`;
+                    coverImageUrl = `${baseUrl}/files/${obj.originalname}`;
                 }
                 if(obj.fieldname === 'serviceIconUrl')
                 {

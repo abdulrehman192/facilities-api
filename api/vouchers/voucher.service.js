@@ -11,16 +11,13 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.createAt = now;
-        const baseUrl =  process.env.BASE_URL;  
-        var files = req.files;
-        
-        if(files.length > 0)
+        const baseUrl = process.env.BASE_URL; 
+        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
+        if(fileUrls.length > 0)
         {
-            files.forEach(function(file){
-                imageUrl = `${baseUrl}/files/${file.originalname}`;
-            });
+            imageUrl = fileUrls[0];
         }
-        pool.query(`select * from service_sub_categories where subCategoryTitle = ?`, [data.subCategoryTitle], (error, result, fields) => {
+        pool.query(`select * from vouchers where voucherCode = ?`, [data.voucherCode], (error, result, fields) => {
             if(error)
             {
                 return callback(errorMessage);
@@ -28,12 +25,15 @@ module.exports = {
             if(result.length <= 0)
             {
     
-                pool.query(`Insert into service_sub_categories (subCategoryTitle, subCategoryUrl, subCategoryDescription, subCategoryServiceId) values (?,?,?,?)`, 
+                pool.query(`Insert into vouchers (voucherCode, amount, imageUrl, serviceId, expiryDate, createAt, isSlideImage) values (?,?,?,?, ?, ?, ?)`, 
                 [
-                    data.subCategoryTitle, 
+                    data.voucherCode, 
+                    data.amount, 
                     imageUrl, 
-                    data.subCategoryDescription, 
-                    data.subCategoryServiceId,
+                    data.serviceId, 
+                    data.expiryDate,
+                    data.createAt,
+                    data.isSlideImage,
                 ],
                 (error, result, fields) => 
                 {
@@ -43,13 +43,13 @@ module.exports = {
                     }
                     else{
                         
-                        return callback(null, "service sub category successfully created");
+                        return callback(null, "voucher successfully created");
                     }
                     
                 });
             }
             else{
-                return callback("sub category already exists with this title. Please enter other title");
+                return callback("voucher already exists with this code. Please enter other code");
             }
         });
        
@@ -68,13 +68,15 @@ module.exports = {
         
         if(imageUrl)
         {
-            pool.query(`Update service_sub_categories set subCategoryTitle = ? , subCategoryUrl = ? , subCategoryDescription = ?, subCategoryServiceId = ? where subCategoryId = ?`, 
+            pool.query(`Update vouchers set voucherCode = ? , amount = ? , imageUrl = ?, serviceId = ?, expiryDate = ?, isSlideImage = ? where voucherId = ?`, 
             [
-                data.subCategoryTitle, 
+                data.voucherCode, 
+                data.amount, 
                 imageUrl, 
-                data.subCategoryDescription, 
-                data.subCategoryServiceId,
-                data.subCategoryId
+                data.serviceId, 
+                data.expiryDate,
+                data.isSlideImage,
+                data.voucherId
             ],
             (error, result, fields) => 
             {
@@ -84,19 +86,21 @@ module.exports = {
                 }
                 else{
                     
-                    return callback(null, "service sub category successfully updated");
+                    return callback(null, "voucher successfully updated");
                 }
                 
             });
         }
         else
         {
-            pool.query(`Update service_sub_categories set subCategoryTitle = ? , subCategoryDescription = ?, subCategoryServiceId = ? where subCategoryId = ?`, 
+            pool.query(`Update vouchers set voucherCode = ? , amount = ?, serviceId = ?, expiryDate = ?, isSlideImage = ? where voucherId = ?`, 
             [
-                data.subCategoryTitle, 
-                data.subCategoryDescription, 
-                data.subCategoryServiceId,
-                data.subCategoryId
+                data.voucherCode, 
+                data.amount, 
+                data.serviceId, 
+                data.expiryDate,
+                data.isSlideImage,
+                data.voucherId
             ],
             (error, result, fields) => 
             {
@@ -106,27 +110,27 @@ module.exports = {
                 }
                 else{
                     
-                    return callback(null, "service sub category successfully updated");
+                    return callback(null, "voucher successfully updated");
                 }
                 
             });
         }
     },
 
-    deleteCategory : (req, callback) =>{
+    deleteVoucher : (req, callback) =>{
         var data = req.body;
-        pool.query("Delete from service_sub_categories where subCategoryId = ?", [data.subCategoryId], (error, result, fields) => {
+        pool.query("Delete from vouchers where voucherId = ?", [data.voucherId], (error, result, fields) => {
             if(error)
         {
             return callback(errorMessage);
         }
-        return callback(null, "service sub category successfully deleted");
+        return callback(null, "voucher successfully deleted");
         } );
     },
 
 
-    getCategories : (data, callback)=> {
-        pool.query("Select subCategoryId, subCategoryServiceId, serviceTitle, subCategoryTitle, subCategoryDescription, subCategoryUrl from service_sub_categories c inner join one_off_services s on c.subCategoryServiceId = s.serviceId ",
+    getVouchers : (data, callback)=> {
+        pool.query("Select * from vouchers",
         [],
             (error, result, fields) => {
             if(error)

@@ -44,8 +44,30 @@ const uploadIfImageUrl = (req, res, next) => {
   }
 };
 
-router.post("/create-service-category", uploadIfImageUrl, createCategory);
-router.patch("/update-service-category", checkToken, uploadIfImageUrl, updateCategory);
+const updateUploadIfImageUrl = (req, res, next) => {
+  if (req.files && req.files.length > 0) {
+    const uploadedFiles = req.files; // This is an array of uploaded files
+    uploadedFiles.forEach((file) => {
+        // Access file information
+        const fieldName = file.fieldname; // Fieldname of the input field
+        const originalName = file.originalname; // Original name of the file
+        const buffer = file.buffer; // Buffer containing the file data
+      
+        // Save the file to a directory
+        // Example using the fs module:
+        const fs = require('fs');
+        const filePath = 'public/files/' + originalName;
+        fs.writeFileSync(filePath, buffer);
+      });
+      next();
+      
+  } else {
+    next();
+  }
+};
+
+router.post("/create-service-category", checkToken, uploadIfImageUrl, createCategory);
+router.patch("/update-service-category", checkToken, updateUploadIfImageUrl, updateCategory);
 router.delete("/delete-service-category", checkToken, deleteCategory);
 router.get("/get-all-service-categories", checkToken, getCategories);
 

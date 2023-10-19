@@ -66,7 +66,7 @@ const updateUploadIfImageUrl = (req, res, next) => {
   }
 };
 
-router.post("/create-service-sub-category", uploadIfImageUrl, createCategory);
+router.post("/create-service-sub-category", checkToken, uploadIfImageUrl, createCategory);
 router.patch("/update-service-sub-category", checkToken, updateUploadIfImageUrl, updateCategory);
 router.delete("/delete-service-sub-category", checkToken, deleteCategory);
 router.get("/get-all-service-sub-categories", checkToken, getCategories);

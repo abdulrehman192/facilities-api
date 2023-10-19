@@ -1,4 +1,4 @@
-const { createService, updateService, deleteService, getServices, searchServices} = require("./service.controller");
+const { createVoucher, updateVoucher, deleteVoucher, getVouchers} = require("./voucher.controller");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/validation-token");
 const multer = require('multer');
@@ -16,37 +16,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-function checkMissingElement(uploadedFiles){
-  var fields = ['serviceCoverImageUrl', 'serviceIconUrl'];
-    var missing = [];
-    for (const obj of uploadedFiles) {
-      fields.forEach(function(field)
-      {
-        if(obj.fieldname === field)
-        {
-          if(!missing.includes(field))
-          {
-            missing.push(field);
-          }
-        }
-      });
-    }
-    return fields.find(elementB => !missing.includes(elementB));
-}
-
 // Middleware to conditionally use multer based on imageUrl presence
 const uploadIfImageUrl = (req, res, next) => {
   if (req.files && req.files.length > 0) {
-    const uploadedFiles = req.files; 
-    
-    const missingElement = checkMissingElement(uploadedFiles);
-    if(missingElement)
-    {
-      return res.status(404).json({
-        success : 0,
-        message : `${missingElement} as File is Required`
-      });
-    }
+    const uploadedFiles = req.files; // This is an array of uploaded files
     uploadedFiles.forEach((file) => {
         // Access file information
         const fieldName = file.fieldname; // Fieldname of the input field
@@ -62,19 +35,19 @@ const uploadIfImageUrl = (req, res, next) => {
       next();
       
   } else {
-    return res.status(404).json({
-      success : 0,
-      message : "serviceCoverImageUrl and serviceIconUrl as File is Required"
-    });
-  
+    return res.status(401).json(
+      {
+        success: 0,
+        message : "imageUrl as File is required"
+      }
+    );
   }
 };
 
 
 const updateUploadIfImageUrl = (req, res, next) => {
   if (req.files && req.files.length > 0) {
-    const uploadedFiles = req.files; 
-
+    const uploadedFiles = req.files; // This is an array of uploaded files
     uploadedFiles.forEach((file) => {
         // Access file information
         const fieldName = file.fieldname; // Fieldname of the input field
@@ -94,10 +67,10 @@ const updateUploadIfImageUrl = (req, res, next) => {
   }
 };
 
-router.post("/create-service", checkToken, uploadIfImageUrl, createService);
-router.patch("/update-service", checkToken, updateUploadIfImageUrl, updateService);
-router.delete("/delete-service", checkToken, deleteService);
-router.get("/get-all-services", checkToken, getServices);
-router.get("/search-services", checkToken, searchServices);
+
+router.post("/create-voucher", checkToken, uploadIfImageUrl, createVoucher);
+router.patch("/update-voucher", checkToken, updateUploadIfImageUrl, updateVoucher);
+router.delete("/delete-voucher", checkToken, deleteVoucher);
+router.get("/get-vouchers", checkToken, getVouchers);
 
 module.exports = router;

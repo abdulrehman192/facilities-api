@@ -34,6 +34,7 @@ const servicesRouter = require("./api/services/service.router");
 const servicessubCategoriesRouter = require("./api/service-sub-categories/sub-category.router");
 const subServicesRouter = require("./api/sub-services/sub.service.router");
 const reviewsRouter = require("./api/reviews/review.router");
+const vouchersRouter = require("./api/vouchers/voucher.router");
 
 
 app.use("/api/auth", userRouter);
@@ -43,8 +44,9 @@ app.use("/api", serviceCategoriesRouter);
 app.use("/api", servicesRouter);
 app.use("/api", servicessubCategoriesRouter);
 app.use("/api", subServicesRouter);
+app.use("/api", vouchersRouter);
 app.use("/api/user", reviewsRouter);
 
-app.listen(process.env.APP_PORT, ()=> {
+app.listen(process.env.APP_PORT || 4000, ()=> {
     console.log("Server is running on port : ", process.env.APP_PORT);
 });
