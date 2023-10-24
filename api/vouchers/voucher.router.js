@@ -71,6 +71,6 @@ const updateUploadIfImageUrl = (req, res, next) => {
 router.post("/create-voucher", checkToken, uploadIfImageUrl, createVoucher);
 router.patch("/update-voucher", checkToken, updateUploadIfImageUrl, updateVoucher);
 router.delete("/delete-voucher", checkToken, deleteVoucher);
-router.get("/get-vouchers", checkToken, getVouchers);
+router.get("/get-vouchers", getVouchers);
 
 module.exports = router;

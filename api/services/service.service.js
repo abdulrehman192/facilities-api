@@ -42,8 +42,8 @@ module.exports = {
             }
             if(result.length <= 0)
             {
-               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, iconImageUrl, data.serviceCreateAt];
-                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl, serviceCreateAt) values(?,?,?,?,?,?,?)`, fields,
+               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, iconImageUrl, data.price, data.serviceCreateAt];
+                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl, price, serviceCreateAt) values(?,?,?,?,?,?,?,?)`, fields,
                     (error, results, fields) =>{
                         if(error)
                         {
@@ -88,18 +88,18 @@ module.exports = {
             var fields = [];
             if(missingElement === "serviceCoverImageUrl")
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceIconUrl = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, iconImageUrl, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceIconUrl = ?, price = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, iconImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
             }
             else if(missingElement === "serviceIconUrl")
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, price = ?,serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
             }
             else
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, serviceIconUrl = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, iconImageUrl, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, serviceIconUrl = ?, price = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, iconImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
             }
             
             pool.query(query, fields,
@@ -117,8 +117,8 @@ module.exports = {
             });
         }
         else{
-            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceUpdateAt = ? where serviceId = ?`;
-            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.serviceUpdateAt, data.serviceId];
+            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?,price = ?, serviceUpdateAt = ? where serviceId = ?`;
+            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,data.price, data.serviceUpdateAt, data.serviceId];
             pool.query(query, fields,
             (error, result, fields) => 
             {
@@ -149,21 +149,117 @@ module.exports = {
     },
 
     getServices : (data, callback)=> {
-        var query = "Select s.serviceId, categorySr, serviceCategoryId, categoryTitle, categoryImageUrl, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl   from one_off_services s inner join service_categories c on s.serviceCategoryId = c.categoryId";
-        if(data.text)
-        {
-            query = "Select s.serviceId, categorySr, serviceCategoryId, categoryTitle, categoryImageUrl, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl   from one_off_services s inner join service_categories c on s.serviceCategoryId = c.categoryId where serviceTitle like ? or serviceSubtitle like ? or serviceDescription like ? or categoryTitle like ?";
-        }
         var text = data.text;
-
+        if(!text)
+        {
+            text = "";
+        }
+        var query = `SELECT
+        
+        os.serviceId,
+        os.serviceCategoryId,
+        os.serviceTitle,
+        os.serviceSubtitle,
+        os.serviceDescription,
+        os.serviceCoverImageUrl,
+        os.serviceIconUrl,
+        os.price,
+        os.serviceCreateAt,
+        os.serviceUpdateAt,
+       
+        ssc.subCategoryId,
+        ssc.subCategoryServiceId,
+        ssc.subCategoryTitle,
+        ssc.subCategoryDescription,
+        ssc.subCategoryUrl,
+    
+        ss.subServiceId,
+        ss.subServiceSubCategoryId,
+        ss.subServiceTitle,
+        ss.subServiceSubtitle,
+        ss.subServiceDescription,
+        ss.subServiceImageUrl,
+        ss.subServiceDuration,
+        ss.subServicePrice,
+        ss.subServiceCreateAt,
+        ss.subServiceUpdateAt
+        
+        FROM one_off_services os 
+        LEFT JOIN service_sub_categories ssc ON os.serviceId = ssc.subCategoryServiceId
+        LEFT JOIN sub_services ss ON ssc.subCategoryId = ss.subServiceSubCategoryId
+        Where serviceTitle like ? or serviceSubtitle like ? or serviceDescription like ? or subCategoryTitle like ? or subServiceTitle like ? or subServiceSubtitle like ? or subServiceDescription like ? order by serviceCategoryId asc;
+    `;
         pool.query(query,
-        [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`],
+        [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%` ],
             (error, result, fields) => {
             if(error)
             {
-                return callback(error);
+                return callback(errorMessage);
             }
-            return callback(null, result);
+
+            var rows = result;
+            const services= [];
+
+            for (const row of rows) {
+                let service = services.find((s) => s.serviceId === row.serviceId);
+
+                    if (!service) {
+                        service = {
+                            serviceId: row.serviceId,
+                            serviceCategoryId: row.serviceCategoryId,
+                            serviceTitle: row.serviceTitle,
+                            serviceSubtitle: row.serviceSubtitle,
+                            serviceDescription: row.serviceDescription,
+                            serviceCoverImageUrl: row.serviceCoverImageUrl,
+                            serviceIconUrl: row.serviceIconUrl,
+                            serviceCreateAt: row.serviceCreateAt,
+                            serviceUpdateAt: row.serviceUpdateAt,
+                            subCategories: []
+                        };
+                        services.push(service);
+                    }
+            
+                    if(row.subCategoryId != null)
+                    {
+                        let subCategory = service.subCategories.find((sc) => sc.subCategoryId === row.subCategoryId);
+                
+                        if (!subCategory) {
+                            subCategory = {
+                                subCategoryId: row.subCategoryId,
+                                subCategoryServiceId: row.subCategoryServiceId,
+                                subCategoryTitle: row.subCategoryTitle,
+                                subCategoryDescription: row.subCategoryDescription,
+                                subCategoryUrl: row.subCategoryUrl,
+                                subServices: []
+                            };
+                            service.subCategories.push(subCategory);
+                        }
+
+                        if(row.subServiceId != null)
+                        {
+                            let subService = subCategory.subServices.find((sc) => sc.subServiceId === row.subServiceId);
+                            if(!subService)
+                            {
+                                subService = {
+                                    subServiceId: row.subServiceId,
+                                    subServiceSubCategoryId: row.subServiceSubCategoryId,
+                                    subServiceTitle: row.subServiceTitle,
+                                    subServiceSubtitle : row.subServiceSubtitle,
+                                    subServiceDescription: row.subServiceDescription,
+                                    subServiceImageUrl: row.subServiceImageUrl,
+                                    subServiceDuration: row.subServiceDuration,
+                                    subServicePrice: row.subServicePrice,
+                                    subServiceCreateAt: row.subServiceCreateAt,
+                                    subServiceUpdateAt: row.subServiceUpdateAt,
+                                };
+                                subCategory.subServices.push(subService);
+                            }
+                        }
+                    }
+                        
+                }
+            
+            return callback(null, services);
             }
         );
     },

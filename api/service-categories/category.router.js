@@ -69,6 +69,6 @@ const updateUploadIfImageUrl = (req, res, next) => {
 router.post("/create-service-category", checkToken, uploadIfImageUrl, createCategory);
 router.patch("/update-service-category", checkToken, updateUploadIfImageUrl, updateCategory);
 router.delete("/delete-service-category", checkToken, deleteCategory);
-router.get("/get-all-service-categories", checkToken, getCategories);
+router.get("/get-all-service-categories", getCategories);
 
 module.exports = router;

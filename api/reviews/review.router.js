@@ -6,6 +6,6 @@ const { checkToken } = require("../../auth/validation-token");
 router.post("/create-review", checkToken, createReview);
 router.patch("/update-review", checkToken, updateReview);
 router.delete("/delete-review", checkToken, deleteReview);
-router.get("/get-reviews", checkToken, getAllReviews);
+router.get("/get-reviews", getAllReviews);
 
 module.exports = router;

@@ -76,66 +76,82 @@ module.exports = {
         {
             imageUrl = fileUrls[0];
         }
-        pool.query(`select * from users where phone = ?`, [data.phone], (error, result, fields) => {
+        pool.query(`select * from users where id = ?`, [data.id], (error, results, fields) => {
             if(error)
             {
+                
                 return callback(errorMessage);
             }
-            if(result.length <= 0){
+            console.log(results);
+            if(results.length <= 1){
                 if(imageUrl)
-        {
-            pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
-        [
-            data.phone, 
-            data.email, 
-            data.gender, 
-            data.country, 
-            data.latitude, 
-            data.longitude, 
-            imageUrl, 
-            data.name, 
-            data.fcmToken, 
-            data.updateAt, 
-            data.id,
-        ],
-        (error, result, fields) => 
-        {
-            if(error)
-            {
-                return callback(errorMessage);
-            }
-            return callback(null, result[0]);
-        }
+                {
+                    pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
+                [
+                    data.phone, 
+                    data.email, 
+                    data.gender, 
+                    data.country, 
+                    data.latitude, 
+                    data.longitude, 
+                    imageUrl, 
+                    data.name, 
+                    data.fcmToken, 
+                    data.updateAt, 
+                    data.id,
+                ],
+                (error, result, fields) => 
+                {
+                    if(error)
+                    {
+                        return callback(errorMessage);
+                    }
+                    pool.query("select * from users where id = ?", [data.id], (error, result, fields) => {
+
+                        if(error)
+                        {
+                            return callback(errorMessage);
+                        }
+                        return callback(null, result[0]);
+                    });
+                }
 
 
-            );
-        }
-        else{
-            pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
-        [
-            data.phone, 
-            data.email, 
-            data.gender, 
-            data.country, 
-            data.latitude, 
-            data.longitude, 
-            data.name, 
-            data.fcmToken, 
-            data.updateAt, 
-            data.id,
-        ],
-        (error, result, fields) => 
-        {
-            if(error)
-            {
-                return callback(errorMessage);
-            }
-            return callback(null, result[0]);
-        }
+                    );
+                }
+                else{
+                    pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
+                [
+                    data.phone, 
+                    data.email, 
+                    data.gender, 
+                    data.country, 
+                    data.latitude, 
+                    data.longitude, 
+                    data.name, 
+                    data.fcmToken, 
+                    data.updateAt, 
+                    data.id,
+                ],
+                (error, result, fields) => 
+                {
+                    if(error)
+                    {
+                        return callback(errorMessage);
+                    }
+                    pool.query("select * from users where id = ?", [data.id], (error, result, fields) => {
+
+                        if(error)
+                        {
+                            return callback(errorMessage);
+                        }
+                        return callback(null, result[0]);
+                    });
+                }
 
 
-            );
-        }
+                    );
+                }
             }
             else{
                 return callback("User already exists with this phone number. Please use another number or login with this number");

@@ -1,4 +1,4 @@
-const { createService, updateService, deleteService, getServices, searchServices} = require("./service.controller");
+const { createService, updateService, deleteService, getServices} = require("./service.controller");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/validation-token");
 const multer = require('multer');
@@ -98,6 +98,5 @@ router.post("/create-service", checkToken, uploadIfImageUrl, createService);
 router.patch("/update-service", checkToken, updateUploadIfImageUrl, updateService);
 router.delete("/delete-service", checkToken, deleteService);
 router.get("/get-all-services", checkToken, getServices);
-router.get("/search-services", checkToken, searchServices);
 
 module.exports = router;

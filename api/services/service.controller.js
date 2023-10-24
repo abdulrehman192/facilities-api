@@ -1,5 +1,5 @@
 
-const  {create, deleteService, getServices, searchServices,update} = require("./service.service");
+const  {create, deleteService, getServices,update} = require("./service.service");
 
 
 module.exports = {
@@ -82,35 +82,8 @@ module.exports = {
         });
     },
 
-    
-getServices : (request, response) => {
-        getServices({}, (error, results) =>{
-            if(error)
-            {
-                return response.status(500).json({
-                    success : 0,
-                    message : error
-                });
-            }
-            if(!results)
-            {
-                return response.json({
-                    success : 0,
-                    message : "No Data Found"
-                });
-            }
-
-            return response.json(
-                {
-                    success : 1,
-                    data : results
-                }
-            );
-        });
-    },
-
-    searchServices : (request, response) => {
-        searchServices(request.body, (error, results) =>{
+    getServices : (request, response) => {
+        getServices(request.body, (error, results) =>{
             if(error)
             {
                 return response.status(500).json({
