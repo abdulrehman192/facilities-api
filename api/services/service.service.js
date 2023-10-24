@@ -3,7 +3,7 @@ const pool = require("../../config/database");
 var errorMessage = "Error while connecting to database server";
 
 function checkMissingElement(uploadedFiles){
-    var fields = ['serviceCoverImageUrl', 'serviceIconUrl'];
+    var fields = ['serviceCoverImageUrl'];
       var missing = [];
       for (const obj of uploadedFiles) {
         fields.forEach(function(field)
@@ -24,7 +24,6 @@ module.exports = {
     create : (req, callback) => {
         // Initialize imageUrl to null
         let coverImageUrl = null;
-        let iconImageUrl = null;
         var data = req.body;
         const now = new Date();
         data.serviceCreateAt = now;
@@ -33,7 +32,6 @@ module.exports = {
         if(fileUrls.length > 0)
         {
             coverImageUrl = fileUrls[0];
-            iconImageUrl = fileUrls[1];
         }
         pool.query(`select * from one_off_services where serviceTitle = ?`, [data.serviceTitle], (error, result, fields) => {
             if(error)
@@ -42,8 +40,8 @@ module.exports = {
             }
             if(result.length <= 0)
             {
-               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, iconImageUrl, data.price, data.serviceCreateAt];
-                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, serviceIconUrl, price, serviceCreateAt) values(?,?,?,?,?,?,?,?)`, fields,
+               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, data.price, data.duration, data.serviceCreateAt];
+                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, price, duration, serviceCreateAt) values(?,?,?,?,?,?,?,?)`, fields,
                     (error, results, fields) =>{
                         if(error)
                         {
@@ -64,7 +62,6 @@ module.exports = {
     },
     update : (req, callback) => {
         let coverImageUrl = null;
-        let iconImageUrl = null;
         var data = req.body;
         const now = new Date();
         data.serviceUpdateAt = now;
@@ -78,28 +75,20 @@ module.exports = {
                 {
                     coverImageUrl = `${baseUrl}/files/${obj.originalname}`;
                 }
-                if(obj.fieldname === 'serviceIconUrl')
-                {
-                    iconImageUrl = `${baseUrl}/public/files/${obj.originalname}`;
-                }
+                
             });
             var missingElement = checkMissingElement(req.files);
             var query = "";
             var fields = [];
             if(missingElement === "serviceCoverImageUrl")
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceIconUrl = ?, price = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, iconImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
-            }
-            else if(missingElement === "serviceIconUrl")
-            {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, price = ?,serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.price, data.duration, data.serviceUpdateAt, data.serviceId];
             }
             else
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ?, serviceIconUrl = ?, price = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, iconImageUrl, data.price, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ? ,price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.duration, data.serviceUpdateAt, data.serviceId];
             }
             
             pool.query(query, fields,
@@ -117,8 +106,8 @@ module.exports = {
             });
         }
         else{
-            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?,price = ?, serviceUpdateAt = ? where serviceId = ?`;
-            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,data.price, data.serviceUpdateAt, data.serviceId];
+            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?,price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
+            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,data.price, data.duration, data.serviceUpdateAt, data.serviceId];
             pool.query(query, fields,
             (error, result, fields) => 
             {
@@ -162,7 +151,7 @@ module.exports = {
         os.serviceSubtitle,
         os.serviceDescription,
         os.serviceCoverImageUrl,
-        os.serviceIconUrl,
+        os.duration,
         os.price,
         os.serviceCreateAt,
         os.serviceUpdateAt,
@@ -189,6 +178,7 @@ module.exports = {
         LEFT JOIN sub_services ss ON ssc.subCategoryId = ss.subServiceSubCategoryId
         Where serviceTitle like ? or serviceSubtitle like ? or serviceDescription like ? or subCategoryTitle like ? or subServiceTitle like ? or subServiceSubtitle like ? or subServiceDescription like ? order by serviceCategoryId asc;
     `;
+        
         pool.query(query,
         [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%` ],
             (error, result, fields) => {
@@ -211,7 +201,8 @@ module.exports = {
                             serviceSubtitle: row.serviceSubtitle,
                             serviceDescription: row.serviceDescription,
                             serviceCoverImageUrl: row.serviceCoverImageUrl,
-                            serviceIconUrl: row.serviceIconUrl,
+                            duration: row.duration,
+                            price : row.price,
                             serviceCreateAt: row.serviceCreateAt,
                             serviceUpdateAt: row.serviceUpdateAt,
                             subCategories: []

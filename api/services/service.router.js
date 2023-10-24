@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 function checkMissingElement(uploadedFiles){
-  var fields = ['serviceCoverImageUrl', 'serviceIconUrl'];
+  var fields = ['serviceCoverImageUrl'];
     var missing = [];
     for (const obj of uploadedFiles) {
       fields.forEach(function(field)
@@ -64,7 +64,7 @@ const uploadIfImageUrl = (req, res, next) => {
   } else {
     return res.status(404).json({
       success : 0,
-      message : "serviceCoverImageUrl and serviceIconUrl as File is Required"
+      message : "serviceCoverImageUrl  as File is Required"
     });
   
   }
@@ -97,6 +97,6 @@ const updateUploadIfImageUrl = (req, res, next) => {
 router.post("/create-service", checkToken, uploadIfImageUrl, createService);
 router.patch("/update-service", checkToken, updateUploadIfImageUrl, updateService);
 router.delete("/delete-service", checkToken, deleteService);
-router.get("/get-all-services", checkToken, getServices);
+router.get("/get-all-services", getServices);
 
 module.exports = router;

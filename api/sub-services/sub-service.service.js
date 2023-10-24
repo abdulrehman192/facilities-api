@@ -152,7 +152,7 @@ module.exports = {
         os.serviceSubtitle,
         os.serviceDescription,
         os.serviceCoverImageUrl,
-        os.serviceIconUrl,
+        os.duration,
         os.price,
         os.serviceCreateAt,
         os.serviceUpdateAt,
@@ -218,7 +218,8 @@ module.exports = {
                             serviceSubtitle: row.serviceSubtitle,
                             serviceDescription: row.serviceDescription,
                             serviceCoverImageUrl: row.serviceCoverImageUrl,
-                            serviceIconUrl: row.serviceIconUrl,
+                            duration: row.duration,
+                            price: row.price,
                             serviceCreateAt: row.serviceCreateAt,
                             serviceUpdateAt: row.serviceUpdateAt,
                             subCategories: []
