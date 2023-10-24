@@ -153,6 +153,7 @@ module.exports = {
         os.serviceDescription,
         os.serviceCoverImageUrl,
         os.serviceIconUrl,
+        os.price,
         os.serviceCreateAt,
         os.serviceUpdateAt,
        
