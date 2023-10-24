@@ -33,9 +33,10 @@ module.exports = {
                     imageUrl, 
                     data.subServiceDuration, 
                     data.subServicePrice, 
+                    data.maxQuantity,
                     data.subServiceCreateAt,
                 ];
-                pool.query(`insert into sub_services (subServiceSubCategoryId, subServiceTitle, subServiceSubtitle, subServiceDescription, subServiceImageUrl, subServiceDuration, subServicePrice, subServiceCreateAt) values (?,?,?,?,?,?,?,?)`, 
+                pool.query(`insert into sub_services (subServiceSubCategoryId, subServiceTitle, subServiceSubtitle, subServiceDescription, subServiceImageUrl, subServiceDuration, subServicePrice, maxQuantity, subServiceCreateAt) values (?,?,?,?,?,?,?,?,?)`, 
                 fields,
                 (error, result, fields) => 
                 {
@@ -70,7 +71,7 @@ module.exports = {
         
         if(imageUrl)
         {
-            pool.query(`Update sub_services set subServiceImageUrl = ? , subServiceSubCategoryId = ?, subServiceTitle = ?, subServiceSubtitle = ? , subServiceDescription = ?, subServiceDuration = ?, subServicePrice = ?, subServiceUpdateAt = ? where subServiceId = ?`, 
+            pool.query(`Update sub_services set subServiceImageUrl = ? , subServiceSubCategoryId = ?, subServiceTitle = ?, subServiceSubtitle = ? , subServiceDescription = ?, subServiceDuration = ?, subServicePrice = ?, maxQuantity = ?, subServiceUpdateAt = ? where subServiceId = ?`, 
         [
             imageUrl,
             data.subServiceSubCategoryId, 
@@ -79,6 +80,7 @@ module.exports = {
             data.subServiceDescription, 
             data.subServiceDuration, 
             data.subServicePrice, 
+            data.maxQuantity,
             data.subServiceUpdateAt,
             data.subServiceId,
         ],
@@ -95,7 +97,7 @@ module.exports = {
             );
         }
         else{
-            pool.query(`Update sub_services set subServiceSubCategoryId = ?, subServiceTitle = ?, subServiceSubtitle = ? , subServiceDescription = ?, subServiceDuration = ?, subServicePrice = ?, subServiceUpdateAt = ? where subServiceId = ?`, 
+            pool.query(`Update sub_services set subServiceSubCategoryId = ?, subServiceTitle = ?, subServiceSubtitle = ? , subServiceDescription = ?, subServiceDuration = ?, subServicePrice = ?, maxQuantity = ?, subServiceUpdateAt = ? where subServiceId = ?`, 
         [
             data.subServiceSubCategoryId, 
             data.subServiceTitle, 
@@ -103,6 +105,7 @@ module.exports = {
             data.subServiceDescription, 
             data.subServiceDuration, 
             data.subServicePrice, 
+            data.maxQuantity,
             data.subServiceUpdateAt,
             data.subServiceId,
         ],
@@ -154,6 +157,7 @@ module.exports = {
         os.serviceCoverImageUrl,
         os.duration,
         os.price,
+        os.maxQuantity,
         os.serviceCreateAt,
         os.serviceUpdateAt,
        
@@ -220,6 +224,7 @@ module.exports = {
                             serviceCoverImageUrl: row.serviceCoverImageUrl,
                             duration: row.duration,
                             price: row.price,
+                            maxQuantity: row.maxQuantity,
                             serviceCreateAt: row.serviceCreateAt,
                             serviceUpdateAt: row.serviceUpdateAt,
                             subCategories: []

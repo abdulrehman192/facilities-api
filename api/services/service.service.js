@@ -40,8 +40,8 @@ module.exports = {
             }
             if(result.length <= 0)
             {
-               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, data.price, data.duration, data.serviceCreateAt];
-                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, price, duration, serviceCreateAt) values(?,?,?,?,?,?,?,?)`, fields,
+               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, data.price, data.duration,data.maxQuantity, data.serviceCreateAt];
+                pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, price, duration, maxQuantity, serviceCreateAt) values(?,?,?,?,?,?,?,?,?)`, fields,
                     (error, results, fields) =>{
                         if(error)
                         {
@@ -82,13 +82,13 @@ module.exports = {
             var fields = [];
             if(missingElement === "serviceCoverImageUrl")
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.price, data.duration, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, price = ?, duration = ?, maxQuantity = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
             }
             else
             {
-                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ? ,price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.duration, data.serviceUpdateAt, data.serviceId];
+                query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ? ,price = ?, duration = ?, maxQuantity = ?, serviceUpdateAt = ? where serviceId = ?`;
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
             }
             
             pool.query(query, fields,
@@ -106,8 +106,8 @@ module.exports = {
             });
         }
         else{
-            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?,price = ?, duration = ?, serviceUpdateAt = ? where serviceId = ?`;
-            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,data.price, data.duration, data.serviceUpdateAt, data.serviceId];
+            query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?,price = ?, duration = ?, maxQuantity = ?, serviceUpdateAt = ? where serviceId = ?`;
+            var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
             pool.query(query, fields,
             (error, result, fields) => 
             {
@@ -153,6 +153,7 @@ module.exports = {
         os.serviceCoverImageUrl,
         os.duration,
         os.price,
+        os.maxQuantity,
         os.serviceCreateAt,
         os.serviceUpdateAt,
        
@@ -203,6 +204,7 @@ module.exports = {
                             serviceCoverImageUrl: row.serviceCoverImageUrl,
                             duration: row.duration,
                             price : row.price,
+                            maxQuantity: row.maxQuantity,
                             serviceCreateAt: row.serviceCreateAt,
                             serviceUpdateAt: row.serviceUpdateAt,
                             subCategories: []
