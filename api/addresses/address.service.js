@@ -19,8 +19,22 @@ module.exports = {
     update : (data, callback) => {
         const now = new Date();
         data.updateAt = now;
-        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, updateAt = ? where id = ? `,
-         [data.latitude, data.longitude, data.description, data.updateAt, data.id], 
+        if(data.isDefault)
+        {
+            if(data.isDefault === 1)
+            {
+                pool.query(`update addresses set isDefault = ? where id != ?`, [0, data.id],
+                (error, results, fields)=> {
+                    if(error)
+                    {
+                        return callback(error);
+                    }
+                }
+                );
+            }
+        }
+        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, isDefault = ?, updateAt = ? where id = ? `,
+         [data.latitude, data.longitude, data.description, data.isDefault, data.updateAt, data.id], 
          (error, results, fields)=> {
             if(error)
                 {
@@ -42,7 +56,7 @@ module.exports = {
     },
 
     getAllUserAddresses : (data, callback) => {
-        pool.query(`select * from addresses where userId = ?`,
+        pool.query(`select * from addresses where userId = ? order by isDefault desc`,
          [data.userId], 
          (error, results, fields)=> {
             if(error)

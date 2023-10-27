@@ -79,10 +79,8 @@ module.exports = {
         pool.query(`select * from users where id = ?`, [data.id], (error, results, fields) => {
             if(error)
             {
-                
                 return callback(errorMessage);
             }
-            console.log(results);
             if(results.length <= 1){
                 if(imageUrl)
                 {
