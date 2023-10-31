@@ -102,7 +102,6 @@ module.exports = {
                 var items = results;
                 for(var row of items)
                 {
-                    console.log(row);
                     let booking = bookings.find((c) => c.bookingId === row.bookingId);
                     if (!booking){
                         booking = {
@@ -161,4 +160,16 @@ module.exports = {
             }
          });
     },
+
+    cancelBooking: (data, callback) =>{
+        pool.query(`update bookings set cancelReason = ?, status = ?, cancelledAt = ? where bookingId = ?`,
+        [ data.cancelReason, data.status, data.cancelledAt, data.bookingId], 
+        (error, results, fields)=> {
+           if(error)
+               {
+                   return callback(error);
+               }
+           return callback(null, results);
+        });
+    }
 }

@@ -1,4 +1,4 @@
-const { createService, getServices, updateService, deleteService} = require("./sub-service.controller");
+const { createService, getServices, updateService, deleteService, getSubServices} = require("./sub-service.controller");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/validation-token");
 const multer = require('multer');
@@ -68,5 +68,6 @@ router.post("/create-sub-service", checkToken, uploadIfImageUrl, createService);
 router.patch("/update-sub-service", checkToken, updateUploadIfImageUrl, updateService);
 router.delete("/delete-sub-service", checkToken, deleteService);
 router.get("/get-all-sub-services", getServices);
+router.get("/get-sub-services", getSubServices);
 
 module.exports = router;

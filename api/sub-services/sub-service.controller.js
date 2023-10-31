@@ -1,5 +1,5 @@
 
-const  {create, deleteService, getServices, update} = require("./sub-service.service");
+const  {create, deleteService, getServices, update, getSubServices} = require("./sub-service.service");
 
 
 module.exports = {
@@ -95,6 +95,34 @@ module.exports = {
         var body = request.body;
     
         getServices(body, (error, results) =>{
+            if(error)
+            {
+                return response.status(500).json({
+                    success : 0,
+                    message : error
+                });
+            }
+            if(!results)
+            {
+                return response.json({
+                    success : 0,
+                    message : "No Data Found"
+                });
+            }
+
+            return response.json(
+                {
+                    success : 1,
+                    data : results
+                }
+            );
+        });
+    },
+
+    getSubServices : (request, response) => {
+        var body = request.body;
+    
+        getSubServices(body, (error, results) =>{
             if(error)
             {
                 return response.status(500).json({

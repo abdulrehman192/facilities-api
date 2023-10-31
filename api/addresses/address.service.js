@@ -6,8 +6,8 @@ module.exports = {
     create :(data, callback) => {
             const now = new Date();
             data.createAt = now;
-            pool.query(`insert into addresses (userId, latitude, longitude, description, createAt) values (?,?,?,?,?)`,
-             [data.userId,data.latitude, data.longitude, data.description, data.createAt], 
+            pool.query(`insert into addresses (userId, latitude, longitude, description, isDefault, createAt) values (?,?,?,?,?,?)`,
+             [data.userId,data.latitude, data.longitude, data.description, data.isDefault, data.createAt], 
              (error, results, fields)=> {
                 if(error)
                     {
@@ -21,9 +21,11 @@ module.exports = {
         data.updateAt = now;
         if(data.isDefault)
         {
-            if(data.isDefault === 1)
+            console.log(data.isDefault);
+            if(data.isDefault == '1')
             {
-                pool.query(`update addresses set isDefault = ? where id != ?`, [0, data.id],
+                console.log(data.userId);
+                pool.query(`update addresses set isDefault = 0 where id != ? and userId = ?`, [data.id, data.userId],
                 (error, results, fields)=> {
                     if(error)
                     {
@@ -33,13 +35,15 @@ module.exports = {
                 );
             }
         }
-        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, isDefault = ?, updateAt = ? where id = ? `,
-         [data.latitude, data.longitude, data.description, data.isDefault, data.updateAt, data.id], 
+        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, isDefault = ?, updateAt = ? where id = ? and userId = ? `,
+         [data.latitude, data.longitude, data.description, data.isDefault, data.updateAt, data.id, data.userId], 
          (error, results, fields)=> {
             if(error)
                 {
                     return callback(error);
                 }
+
+                
             return callback(null, results);
          });
     },

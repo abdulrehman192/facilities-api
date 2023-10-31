@@ -278,4 +278,21 @@ module.exports = {
             }
         );
     },
+
+    getSubServices: (data, callback)=>{
+        var text = data.text;
+        if(!text)
+        {
+            text = "";
+        }
+        pool.query(`Select * from sub_services where subServiceTitle like ? or subServiceSubtitle like ? or subServiceDescription like ?  order by subServiceSubCategoryId asc`,
+        [`%${text}%`,`%${text}%`,`%${text}%`], 
+        (error, result, fields) =>{
+            if(error)
+            {
+                return callback(errorMessage);
+            }
+            return callback(null, result);
+        });
+    }
 }
