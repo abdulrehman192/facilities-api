@@ -7,8 +7,10 @@ var errorMessage = "Error while connecting to database server";
 module.exports = {
     create : (req, callback) => {
         // Initialize imageUrl to null
+
         let imageUrl = null;
         var data = req.body;
+        console.log(data);
         const now = new Date();
         data.createAt = now;
         const baseUrl =  process.env.BASE_URL; 
@@ -20,6 +22,7 @@ module.exports = {
         pool.query(`select * from service_categories where categoryTitle = ?`, [data.categoryTitle], (error, result, fields) => {
             if(error)
             {
+                
                 return callback(errorMessage);
             }
             if(result.length <= 0)
@@ -36,6 +39,7 @@ module.exports = {
                 {
                     if(error)
                     {
+                        
                         return callback(errorMessage);
                     }
                     else{

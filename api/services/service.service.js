@@ -147,6 +147,7 @@ module.exports = {
         
         os.serviceId,
         os.serviceCategoryId,
+        sc.categoryTitle,
         os.serviceTitle,
         os.serviceSubtitle,
         os.serviceDescription,
@@ -175,6 +176,7 @@ module.exports = {
         ss.subServiceUpdateAt
         
         FROM one_off_services os 
+        LEFT JOIN service_categories sc ON os.serviceCategoryId = sc.categoryId
         LEFT JOIN service_sub_categories ssc ON os.serviceId = ssc.subCategoryServiceId
         LEFT JOIN sub_services ss ON ssc.subCategoryId = ss.subServiceSubCategoryId
         Where serviceTitle like ? or serviceSubtitle like ? or serviceDescription like ? or subCategoryTitle like ? or subServiceTitle like ? or subServiceSubtitle like ? or subServiceDescription like ? order by serviceCategoryId asc;
@@ -198,6 +200,7 @@ module.exports = {
                         service = {
                             serviceId: row.serviceId,
                             serviceCategoryId: row.serviceCategoryId,
+                            categoryTitle : row.categoryTitle,
                             serviceTitle: row.serviceTitle,
                             serviceSubtitle: row.serviceSubtitle,
                             serviceDescription: row.serviceDescription,

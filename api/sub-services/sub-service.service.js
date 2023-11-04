@@ -152,6 +152,7 @@ module.exports = {
         os.serviceId,
         os.serviceCategoryId,
         os.serviceTitle,
+        sc.categoryTitle,
         os.serviceSubtitle,
         os.serviceDescription,
         os.serviceCoverImageUrl,
@@ -218,6 +219,7 @@ module.exports = {
                         service = {
                             serviceId: row.serviceId,
                             serviceCategoryId: row.serviceCategoryId,
+                            categoryTitle: row.categoryTitle,
                             serviceTitle: row.serviceTitle,
                             serviceSubtitle: row.serviceSubtitle,
                             serviceDescription: row.serviceDescription,

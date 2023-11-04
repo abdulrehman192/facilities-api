@@ -4,9 +4,25 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const cors = require('cors');
 
 // initiate express 
 const app = express();
+app.use(cors());
+const allowedOrigins = [process.env.BASE_URL, 'http://localhost:61703/'];
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,PUT,PATCH,POST,DELETE',
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }))
 app.use(multer().any());
 app.use(bodyParser.urlencoded({ extended: false }));
