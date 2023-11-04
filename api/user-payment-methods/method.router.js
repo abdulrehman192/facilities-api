@@ -6,6 +6,6 @@ const { checkToken } = require("../../auth/validation-token");
 router.post("/create-user-payment-method", checkToken, createMethod);
 router.patch("/update-user-payment-method", checkToken, updateMethod);
 router.delete("/delete-user-payment-method", checkToken, deleteMethod);
-router.get("/get-user-payment-methods", checkToken, getAllUserMethods);
+router.post("/get-user-payment-methods", checkToken, getAllUserMethods);
 
 module.exports = router;

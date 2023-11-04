@@ -45,7 +45,7 @@ router.post("/create-user", uploadIfImageUrl, createUser);
 router.patch("/update-user", checkToken, uploadIfImageUrl, updateUser);
 router.delete("/delete-user", checkToken, deleteUser);
 router.get("/get-all-users", checkToken, getAllUsers);
-router.get("/get-one-user-by-id", checkToken, getOneUserById);
+router.post("/get-one-user-by-id", checkToken, getOneUserById);
 router.post("/login", login);
 
 module.exports = router;

@@ -97,6 +97,6 @@ const updateUploadIfImageUrl = (req, res, next) => {
 router.post("/create-service", checkToken, uploadIfImageUrl, createService);
 router.patch("/update-service", checkToken, updateUploadIfImageUrl, updateService);
 router.delete("/delete-service", checkToken, deleteService);
-router.get("/get-all-services", getServices);
+router.post("/get-all-services", getServices);
 
 module.exports = router;
