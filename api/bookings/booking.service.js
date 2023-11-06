@@ -438,9 +438,23 @@ module.exports = {
             }
          });
     },
+
     cancelBooking: (data, callback) =>{
         pool.query(`update bookings set cancelReason = ?, status = ?, cancelledAt = ? where bookingId = ?`,
         [ data.cancelReason, data.status, data.cancelledAt, data.bookingId], 
+        (error, results, fields)=> {
+           if(error)
+               {
+                   return callback(error);
+               }
+           return callback(null, results);
+        });
+    },
+
+    updateBookingStatus: (data, callback) =>{
+        data.updateAt = now;
+        pool.query(`update bookings set status = ?, updateAt = ? where bookingId = ?`,
+        [data.status, data.updateAt, data.bookingId], 
         (error, results, fields)=> {
            if(error)
                {
