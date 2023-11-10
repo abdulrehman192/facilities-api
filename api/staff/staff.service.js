@@ -40,6 +40,7 @@ module.exports = {
                 {
                     if(error)
                     {
+                        console.log("Here is the error");
                         return callback(errorMessage);
                     }
                     return callback(null, result);
