@@ -452,6 +452,7 @@ module.exports = {
     },
 
     updateBookingStatus: (data, callback) =>{
+        const now = new Date();
         data.updateAt = now;
         pool.query(`update bookings set status = ?, updateAt = ? where bookingId = ?`,
         [data.status, data.updateAt, data.bookingId], 

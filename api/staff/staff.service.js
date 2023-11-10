@@ -17,7 +17,7 @@ module.exports = {
         {
             imageUrl = fileUrls[0];
         }
-        pool.query(`select * from users where phone = ?`, [data.phone], (error, result, fields) => {
+        pool.query(`select * from staff where phone = ?`, [data.phone], (error, result, fields) => {
             if(error)
             {
                 return callback(errorMessage);
@@ -25,19 +25,16 @@ module.exports = {
             if(result.length <= 0)
             {
     
-                pool.query(`Insert into users (phone, email, gender, country, latitude, longitude, imageUrl, name, fcmToken, createAt, updateAt) values (?,?,?,?,?,?,?,?,?,?,?)`, 
+                pool.query(`Insert into staff (phone, email, gender, role, imageUrl, name, fcmToken, createAt) values (?,?,?,?,?,?,?,?)`, 
                 [
                     data.phone, 
                     data.email, 
                     data.gender, 
-                    data.country, 
-                    data.latitude, 
-                    data.longitude, 
+                    data.role, 
                     imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.createAt, 
-                    data.updateAt, 
                 ],
                 (error, result, fields) => 
                 {
@@ -45,22 +42,12 @@ module.exports = {
                     {
                         return callback(errorMessage);
                     }
-                    else{
-                        
-                        pool.query("select * from users where phone = ?", [data.phone], (error, result, fields) => {
-
-                            if(error)
-                            {
-                                return callback(errorMessage);
-                            }
-                            return callback(null, result[0]);
-                        });
-                    }
+                    return callback(null, result);
                     
                 });
             }
             else{
-                return callback("User already exists with this phone number. Please login instead");
+                return callback("Staff account already exists with this phone number. Please login instead");
             }
         });
        
@@ -76,7 +63,7 @@ module.exports = {
         {
             imageUrl = fileUrls[0];
         }
-        pool.query(`select * from users where id = ?`, [data.id], (error, results, fields) => {
+        pool.query(`select * from staff where staffId = ?`, [data.staffId], (error, results, fields) => {
             if(error)
             {
                 return callback(errorMessage);
@@ -84,75 +71,53 @@ module.exports = {
             if(results.length <= 1){
                 if(imageUrl)
                 {
-                    pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
+                    pool.query(`Update staff set phone = ?, email = ?, gender = ? , role = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where staffId = ?`, 
                 [
                     data.phone, 
                     data.email, 
                     data.gender, 
-                    data.country, 
-                    data.latitude, 
-                    data.longitude, 
+                    data.role, 
                     imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.updateAt, 
-                    data.id,
+                    data.staffId,
                 ],
                 (error, result, fields) => 
                 {
                     if(error)
                     {
+                        console.log("Here is the error");
                         return callback(errorMessage);
                     }
-                    pool.query("select * from users where id = ?", [data.id], (error, result, fields) => {
-
-                        if(error)
-                        {
-                            return callback(errorMessage);
-                        }
-                        return callback(null, result[0]);
-                    });
-                }
-
-
-                    );
+                    return callback(null, result);
+                });
                 }
                 else{
-                    pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
+                    pool.query(`Update staff set phone = ?, email = ?, gender = ? , role = ?, name = ?, fcmToken = ?,  updateAt = ? where staffId = ?`, 
                 [
                     data.phone, 
                     data.email, 
                     data.gender, 
-                    data.country, 
-                    data.latitude, 
-                    data.longitude, 
+                    data.role, 
                     data.name, 
                     data.fcmToken, 
                     data.updateAt, 
-                    data.id,
+                    data.staffId,
                 ],
                 (error, result, fields) => 
                 {
                     if(error)
                     {
+                        console.log("Here is the error");
                         return callback(errorMessage);
                     }
-                    pool.query("select * from users where id = ?", [data.id], (error, result, fields) => {
-
-                        if(error)
-                        {
-                            return callback(errorMessage);
-                        }
-                        return callback(null, result[0]);
-                    });
-                }
-
-
-                    );
+                    return callback(null, result);
+                });
                 }
             }
             else{
-                return callback("User already exists with this phone number. Please use another number or login with this number");
+                return callback("Staff Account already exists with this phone number. Please use another number or login with this number");
             }
 
         });
@@ -160,19 +125,19 @@ module.exports = {
         
     },
 
-    deleteUser : (req, callback) =>{
+    deleteStaff : (req, callback) =>{
         var data = req.body;
-        pool.query("Delete from users where id = ?", [data.id], (error, result, fields) => {
+        pool.query("Delete from staff where staffId = ?", [data.staffId], (error, result, fields) => {
             if(error)
         {
             return callback(errorMessage);
         }
-        return callback(null, "user account successfully deleted");
+        return callback(null, "staff account successfully deleted");
         } );
     },
 
-    getUserById : (id, callback) => {
-        pool.query("select * from users where id = ?", [id], (error, result, fields) => {
+    getStaffById : (id, callback) => {
+        pool.query("select * from staff where staffId = ?", [id], (error, result, fields) => {
 
             if(error)
             {
@@ -181,14 +146,14 @@ module.exports = {
             return callback(null, result);
         });
     },
-    getUsers : (data, callback)=> {
+    getStaff : (data, callback)=> {
         var text = "";
         if(data.text)
         {
             text = data.text;
         }
-        pool.query("Select * from users where name like ? or phone like ? or email like ?",
-        [`%${text}%`,`%${text}%`,`%${text}%`],
+        pool.query("Select * from staff where name like ? or email like ? or phone like ? or role like ?",
+        [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`],
             (error, result, fields) => {
             if(error)
             {
@@ -198,8 +163,8 @@ module.exports = {
             }
         );
     },
-    getUserByPhone : (data, callback) =>{
-        pool.query("Select * from users where phone = ?  ", [data.phone], (error, result, fields)=> {
+    getStaffByPhone : (data, callback) =>{
+        pool.query("Select * from staff where phone = ?  ", [data.phone], (error, result, fields)=> {
             if(error)
             {
                 return callback(errorMessage);

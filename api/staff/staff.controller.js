@@ -1,11 +1,10 @@
 
-const  {create, deleteUser, getUsers, update, getUserById, getUserByPhone} = require("./user.service");
+const  {create, deleteStaff, getStaff, update, getStaffById, getStaffByPhone} = require("./staff.service");
 const { sign } = require("jsonwebtoken");
-const multer = require('multer');
-const bodyParser = require('body-parser');
+
 
 module.exports = {
-    createUser : (request, response) => 
+    createStaffAccount : (request, response) => 
     {
         const body = request.body;
         create(request, (error, result)=> {
@@ -26,49 +25,20 @@ module.exports = {
                 }
             }
 
-            getUserByPhone(body, (error, results) => {
-                if(error)
-                {
-                    return response.status(500).json({
-                        success : 0,
-                        message : error
-                    });
-                }
-    
-                if(!results)
-                {
-                    return response.status(404).json(
-                        {
-                            success : 0,
-                            message : "User account not exists. Please signup first"
-                        }
-                    );
-                }
-                else
-                {
-                    const jsonToken = sign({result : results}, process.env.SECRET_KEY, {
-                        expiresIn : "1400h"
-                    });
-                    return response.json({
-                        success : 1,
-                        message : "successfully login",
-                        accessToken: jsonToken,
-                        data : results
-                    });
-                }
+            return response.status(200).json({
+                success : 1,
+                message : "staff account successfully created"
             });
-
-            
         });
     },
 
-    updateUser : (request, response) => {
+    updateStaffAccount : (request, response) => {
 
-        if(!request.body.id)
+        if(!request.body.staffId)
         {
             return response.status(400).json({
                 success : 0,
-                message: "id is required to update data"
+                message: "staffId is required to update data"
             });
         }
 
@@ -92,20 +62,20 @@ module.exports = {
 
             return response.status(200).json({
                 success : 1,
-                data : results
+                message : "Staff account successfully updated"
             });
         });
     },
 
-    deleteUser: (request, response) =>{
-        if(!request.body.id)
+    deleteStaffAccount : (request, response) =>{
+        if(!request.body.staffId)
         {
             return response.status(400).json({
                 success : 0,
-                message: "id is required to delete data"
+                message: "staffId is required to delete data"
             });
         }
-        deleteUser(request, (error, results) => {
+        deleteStaff(request, (error, results) => {
             if(error)
             {
                 return response.status(500).json({
@@ -116,15 +86,15 @@ module.exports = {
 
             return response.status(200).json({
                 success : 1,
-                data : "user account successfully deleted"
+                data : "staff account successfully deleted"
             });
         });
     },
 
-    getOneUserById : (request, response) => {
+    getOneStaffAccountById : (request, response) => {
         
         const id = request.query.id;
-        getUserById(id, (error, results)=>{
+        getStaffById(id, (error, results)=>{
             if(error)
             {
                 return response.status(500).json({
@@ -151,10 +121,10 @@ module.exports = {
         });
         
     },
-    getAllUsers : (request, response) => {
+    getAllStaffAccounts : (request, response) => {
 
         console.log(request.params);
-        getUsers(request.body, (error, results) =>{
+        getStaff(request.body, (error, results) =>{
             if(error)
             {
                 return response.status(500).json({
@@ -178,7 +148,7 @@ module.exports = {
             );
         });
     },
-    login : (request, response) => {
+    staffLogin : (request, response) => {
         var body = request.body;
         if(!body.phone)
         {
@@ -187,7 +157,7 @@ module.exports = {
                 message: "phone is required to login"
             });
         }
-        getUserByPhone(body, (error, results) => {
+        getStaffByPhone(body, (error, results) => {
             if(error)
             {
                 return response.status(500).json({
@@ -201,7 +171,7 @@ module.exports = {
                 return response.status(404).json(
                     {
                         success : 0,
-                        message : "User account not exists. Please signup first"
+                        message : "staff account not exists. Please create account"
                     }
                 );
             }
