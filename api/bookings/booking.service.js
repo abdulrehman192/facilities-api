@@ -58,8 +58,8 @@ module.exports = {
             
           items = JSON.parse(data.items);
         }
-        pool.query(`update bookings set instructions = ?, hours = ?, professionals = ?, includeMaterial = ?, subTotal = ?, tax = ?, voucherPrice = ?, serviceFee = ?, materialCost = ?, netTotal = ?, voucherCode = ?, addressId = ?, updateAt = ? where bookingId = ?`,
-         [data.instructions, data.hours, data.professionals, data.includeMaterial, data.subTotal, data.tax, data.voucherPrice, data.serviceFee, data.materialCost, data.netTotal, data.voucherCode, data.addressId, data.updateAt, data.bookingId], 
+        pool.query(`update bookings set instructions = ?, hours = ?, professionals = ?, includeMaterial = ?, subTotal = ?, tax = ?, voucherPrice = ?, serviceFee = ?, materialCost = ?, netTotal = ?, voucherCode = ?, addressId = ?, professionalId = ?, updateAt = ? where bookingId = ?`,
+         [data.instructions, data.hours, data.professionals, data.includeMaterial, data.subTotal, data.tax, data.voucherPrice, data.serviceFee, data.materialCost, data.netTotal, data.voucherCode, data.addressId, data.professionalId, data.updateAt, data.bookingId], 
          (error, results, fields)=> {
             if(error)
                 {
