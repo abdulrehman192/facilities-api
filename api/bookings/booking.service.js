@@ -206,6 +206,9 @@ module.exports = {
                         }
                         booking = {
                             bookingId: row.bookingId,
+                            professionalId: row.professionalId,
+                            userId: row.userId,
+                            addressId: row.addressId,
                             bookingCode: row.bookingCode,
                             instructions: row.instructions,
                             frequency : row.frequency,
@@ -384,6 +387,9 @@ module.exports = {
                         }
                         booking = {
                             bookingId: row.bookingId,
+                            professionalId: row.professionalId,
+                            userId: row.userId,
+                            addressId: row.addressId,
                             bookingCode: row.bookingCode,
                             instructions: row.instructions,
                             frequency : row.frequency,
