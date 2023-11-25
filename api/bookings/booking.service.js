@@ -89,182 +89,6 @@ module.exports = {
     },
 
     getAllUserBookings : (data, callback) => {
-        pool.query(`Select
-         b.bookingId,
-         bookingCode, 
-         instructions,
-         frequency,
-         b.bookingDate,
-         hours, 
-         professionals, 
-         includeMaterial, 
-         professionalId, 
-         subTotal, 
-         tax, 
-         voucherPrice, 
-         serviceFee, 
-         materialCost, 
-         netTotal, 
-         voucherCode, 
-         paymentMethod, 
-         userMethodId, 
-         b.serviceDate, 
-         status, 
-         cancelReason,
-         cancelledAt, 
-         b.updateAt,
-         
-         i.id, 
-         i.serviceId, 
-         qty, 
-         price, 
-         isSubService,
-         
-         b.userId,
-         u.name as username,
-         u.gender,
-         u.phone,
-         u.email,
-         u.latitude,
-         u.longitude,
-         u.imageUrl,
-         u.fcmToken,
-         
-         addressId, 
-         a.latitude as addressLatitude,
-         a.longitude as addressLongitude,
-         a.description as addressDescription,
-
-         s.staffId,
-         s.name as staffName,
-         s.phone as staffPhone,
-         s.email as staffEmail,
-         s.gender as staffGender,
-         s.imageUrl as staffImageUrl,
-         s.fcmToken as staffFcmToken,
-         s.role
-         
-         from bookings b 
-         left join booking_items i on b.bookingId = i.bookingId
-         left join users u on b.userId = u.id
-         left join addresses a on b.addressId = a.id
-         left join staff s on b.professionalId = s.staffId
-         where b.userId = ? order by b.serviceDate desc`,
-         [data.userId], 
-         (error, results, fields)=> {
-            if(error)
-                {
-                    return callback(error);
-                }
-            else
-            {
-                var bookings = [];
-                var items = results;
-                for(var row of items)
-                {
-                    let booking = bookings.find((c) => c.bookingId === row.bookingId);
-                    if (!booking){
-                        let user = null;
-                        let address = null;
-                        let staff = null;
-                        if(row.staffId)
-                        {
-                            staff = {
-                                staffId : row.staffId,
-                                name : row.staffName,
-                                gender : row.staffGender,
-                                email : row.staffEmail,
-                                longitude : row.longitude,
-                                imageUrl : row.staffImageUrl,
-                                fcmToken: row.staffFcmToken,
-                            };
-                        }
-                        if(row.addressLatitude)
-                        {
-                            address = {
-                                id : row.addressId,
-                                userId : row.userId,
-                                latitude : row.addressLatitude,
-                                longitude: row.addressLongitude,
-                                description : row.addressDescription,
-                            };
-                        }
-                        if(row.username)
-                        {
-                            user = {
-                                id : row.userId,
-                                name : row.username,
-                                gender : row.gender,
-                                email : row.email,
-                                phone : row.phone,
-                                latitude : row.latitude,
-                                longitude : row.longitude,
-                                imageUrl : row.imageUrl,
-                                fcmToken: row.fcmToken,
-
-                            };
-                        }
-                        booking = {
-                            bookingId: row.bookingId,
-                            professionalId: row.professionalId,
-                            userId: row.userId,
-                            addressId: row.addressId,
-                            bookingCode: row.bookingCode,
-                            instructions: row.instructions,
-                            frequency : row.frequency,
-                            bookingDate: row.bookingDate,
-                            hours: row.hours,
-                            professionals: row.professionals,
-                            includeMaterial: row.includeMaterial,
-                            subTotal: row.subTotal,
-                            tax: row.tax,
-                            voucherPrice: row.voucherPrice,
-                            serviceFee: row.serviceFee,
-                            materialCost: row.materialCost,
-                            netTotal: row.netTotal,
-                            voucherCode: row.voucherCode,
-                            paymentMethod: row.paymentMethod,
-                            userMethodId: row.userMethodId,
-                            serviceDate: row.serviceDate,
-                            status: row.status,
-                            cancelReason: row.cancelReason,
-                            cancelledAt: row.cancelledAt,
-                            updateAt: row.updateAt,
-                            user : user,
-                            address : address,
-                            staff : staff,
-                            items: []
-                        };
-                        bookings.push(booking);
-                    }
-                    if(row.id != null)
-                    {
-                        let item = booking.items.find((s) => s.id === row.id);
-
-                        if (!item) {
-                            item = {
-                                id: row.id,
-                                bookingId: row.bookingId,
-                                serviceId: row.serviceId,
-                                userId: row.userId,
-                                qty: row.qty,
-                                price: row.price,
-                                isSubService: row.isSubService,
-                                bookingDate: row.bookingDate,
-                                serviceDate: row.serviceDate,
-                            };
-                            booking.items.push(item);
-                        }
-                
-                }
-                
-            }
-            return callback(null, bookings);
-            }
-         });
-    },
-   
-    getAllBookings : (data, callback) => {
         var text = data.text;
         if(!text)
         {
@@ -330,118 +154,551 @@ module.exports = {
          left join users u on b.userId = u.id
          left join addresses a on b.addressId = a.id
          left join staff s on b.professionalId = s.staffId
-         where bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
+         where b.userId = ? and bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
+         [data.userId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
+         (error, results, fields)=> {
+            if(error)
+                {
+                    return callback(error);
+                }
+                else
+                {
+                    var bookings = [];
+                    var items = results;
+                    for(var row of items)
+                    {
+                        let booking = bookings.find((c) => c.bookingId === row.bookingId);
+                        if (!booking){
+                            let user = null;
+                            let address = null;
+                            let staff = null;
+                            if(row.staffId)
+                            {
+                                staff = {
+                                    staffId : row.staffId,
+                                    name : row.staffName,
+                                    gender : row.staffGender,
+                                    email : row.staffEmail,
+                                    phone : row.staffPhone,
+                                    imageUrl : row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role : row.role
+                                };
+                            }
+                            if(row.addressLatitude)
+                            {
+                                address = {
+                                    id : row.addressId,
+                                    userId : row.userId,
+                                    latitude : row.addressLatitude,
+                                    longitude: row.addressLongitude,
+                                    description : row.addressDescription,
+                                };
+                            }
+                            if(row.username)
+                            {
+                                user = {
+                                    id : row.userId,
+                                    name : row.username,
+                                    gender : row.gender,
+                                    email : row.email,
+                                    phone : row.phone,
+                                    latitude : row.latitude,
+                                    longitude : row.longitude,
+                                    imageUrl : row.imageUrl,
+                                    fcmToken: row.fcmToken,
+    
+                                };
+                            }
+                            booking = {
+                                bookingId: row.bookingId,
+                                professionalId: row.professionalId,
+                                userId: row.userId,
+                                addressId: row.addressId,
+                                bookingCode: row.bookingCode,
+                                instructions: row.instructions,
+                                frequency : row.frequency,
+                                bookingDate: row.bookingDate,
+                                hours: row.hours,
+                                professionals: row.professionals,
+                                includeMaterial: row.includeMaterial,
+                                subTotal: row.subTotal,
+                                tax: row.tax,
+                                voucherPrice: row.voucherPrice,
+                                serviceFee: row.serviceFee,
+                                materialCost: row.materialCost,
+                                netTotal: row.netTotal,
+                                voucherCode: row.voucherCode,
+                                paymentMethod: row.paymentMethod,
+                                userMethodId: row.userMethodId,
+                                serviceDate: row.serviceDate,
+                                status: row.status,
+                                cancelReason: row.cancelReason,
+                                cancelledAt: row.cancelledAt,
+                                updateAt: row.updateAt,
+                                user : user,
+                                address : address,
+                                staff : staff,
+                                items: [], 
+                                tasks: []
+                            };
+                            bookings.push(booking);
+                        }
+                        if(row.id != null)
+                        {
+                            let item = booking.items.find((s) => s.id === row.id);
+    
+                            if (!item) {
+                                item = {
+                                    id: row.id,
+                                    bookingId: row.bookingId,
+                                    serviceId: row.serviceId,
+                                    userId: row.userId,
+                                    qty: row.qty,
+                                    price: row.price,
+                                    isSubService: row.isSubService,
+                                    bookingDate: row.bookingDate,
+                                    serviceDate: row.serviceDate,
+                                };
+                                booking.items.push(item);
+                            }
+                    
+                        }
+    
+                        if(row.taskId != null)
+                        {
+                            let task = booking.tasks.find((s) => s.id === row.taskId);
+    
+                            if (!task) {
+                                task = {
+                                    id: row.taskId,
+                                    bookingId: row.bookingId,
+                                    title: row.taskTitle,
+                                    description: row.taskDescription,
+                                    status: row.taskStatus,
+                                    createAt: row.taskCreateAt,
+                                    completeAt: row.taskCompleteAt
+                                };
+                                booking.tasks.push(task);
+                            }
+                    
+                        }
+                    
+                }
+                return callback(null, bookings);
+                }
+         });
+    },
+
+    getAllProfessionalBookings : (data, callback) => {
+        var text = data.text;
+        if(!text)
+        {
+            text = "";
+        }
+        pool.query(`Select
+         b.bookingId,
+         bookingCode, 
+         instructions,
+         frequency,
+         b.bookingDate,
+         hours, 
+         professionals, 
+         includeMaterial, 
+         professionalId, 
+         subTotal, 
+         tax, 
+         voucherPrice, 
+         serviceFee, 
+         materialCost, 
+         netTotal, 
+         voucherCode, 
+         paymentMethod, 
+         userMethodId, 
+         b.serviceDate, 
+         status, 
+         cancelReason,
+         cancelledAt, 
+         b.updateAt,
+         
+         i.id, 
+         i.serviceId, 
+         qty, 
+         price, 
+         isSubService,
+         
+         b.userId,
+         u.name as username,
+         u.gender,
+         u.phone,
+         u.email,
+         u.latitude,
+         u.longitude,
+         u.imageUrl,
+         u.fcmToken,
+         
+         addressId, 
+         a.latitude as addressLatitude,
+         a.longitude as addressLongitude,
+         a.description as addressDescription,
+
+         s.staffId,
+         s.name as staffName,
+         s.phone as staffPhone,
+         s.email as staffEmail,
+         s.gender as staffGender,
+         s.imageUrl as staffImageUrl,
+         s.fcmToken as staffFcmToken,
+         s.role
+         
+         from bookings b 
+         left join booking_items i on b.bookingId = i.bookingId
+         left join users u on b.userId = u.id
+         left join addresses a on b.addressId = a.id
+         left join staff s on b.professionalId = s.staffId
+         where b.professionalId = ? and (bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? ) order by b.serviceDate desc`,
+         [data.professionalId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
+         (error, results, fields)=> {
+            if(error)
+                {
+                    return callback(error);
+                }
+                else
+                {
+                    var bookings = [];
+                    var items = results;
+                    for(var row of items)
+                    {
+                        let booking = bookings.find((c) => c.bookingId === row.bookingId);
+                        if (!booking){
+                            let user = null;
+                            let address = null;
+                            let staff = null;
+                            if(row.staffId)
+                            {
+                                staff = {
+                                    staffId : row.staffId,
+                                    name : row.staffName,
+                                    gender : row.staffGender,
+                                    email : row.staffEmail,
+                                    phone : row.staffPhone,
+                                    imageUrl : row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role : row.role
+                                };
+                            }
+                            if(row.addressLatitude)
+                            {
+                                address = {
+                                    id : row.addressId,
+                                    userId : row.userId,
+                                    latitude : row.addressLatitude,
+                                    longitude: row.addressLongitude,
+                                    description : row.addressDescription,
+                                };
+                            }
+                            if(row.username)
+                            {
+                                user = {
+                                    id : row.userId,
+                                    name : row.username,
+                                    gender : row.gender,
+                                    email : row.email,
+                                    phone : row.phone,
+                                    latitude : row.latitude,
+                                    longitude : row.longitude,
+                                    imageUrl : row.imageUrl,
+                                    fcmToken: row.fcmToken,
+    
+                                };
+                            }
+                            booking = {
+                                bookingId: row.bookingId,
+                                professionalId: row.professionalId,
+                                userId: row.userId,
+                                addressId: row.addressId,
+                                bookingCode: row.bookingCode,
+                                instructions: row.instructions,
+                                frequency : row.frequency,
+                                bookingDate: row.bookingDate,
+                                hours: row.hours,
+                                professionals: row.professionals,
+                                includeMaterial: row.includeMaterial,
+                                subTotal: row.subTotal,
+                                tax: row.tax,
+                                voucherPrice: row.voucherPrice,
+                                serviceFee: row.serviceFee,
+                                materialCost: row.materialCost,
+                                netTotal: row.netTotal,
+                                voucherCode: row.voucherCode,
+                                paymentMethod: row.paymentMethod,
+                                userMethodId: row.userMethodId,
+                                serviceDate: row.serviceDate,
+                                status: row.status,
+                                cancelReason: row.cancelReason,
+                                cancelledAt: row.cancelledAt,
+                                updateAt: row.updateAt,
+                                user : user,
+                                address : address,
+                                staff : staff,
+                                items: [], 
+                                tasks: []
+                            };
+                            bookings.push(booking);
+                        }
+                        if(row.id != null)
+                        {
+                            let item = booking.items.find((s) => s.id === row.id);
+    
+                            if (!item) {
+                                item = {
+                                    id: row.id,
+                                    bookingId: row.bookingId,
+                                    serviceId: row.serviceId,
+                                    userId: row.userId,
+                                    qty: row.qty,
+                                    price: row.price,
+                                    isSubService: row.isSubService,
+                                    bookingDate: row.bookingDate,
+                                    serviceDate: row.serviceDate,
+                                };
+                                booking.items.push(item);
+                            }
+                    
+                        }
+    
+                        if(row.taskId != null)
+                        {
+                            let task = booking.tasks.find((s) => s.id === row.taskId);
+    
+                            if (!task) {
+                                task = {
+                                    id: row.taskId,
+                                    bookingId: row.bookingId,
+                                    title: row.taskTitle,
+                                    description: row.taskDescription,
+                                    status: row.taskStatus,
+                                    createAt: row.taskCreateAt,
+                                    completeAt: row.taskCompleteAt
+                                };
+                                booking.tasks.push(task);
+                            }
+                    
+                        }
+                    
+                }
+                return callback(null, bookings);
+                }
+         });
+    },
+   
+    getAllBookings : (data, callback) => {
+        var text = data.text;
+        if(!text)
+        {
+            text = "";
+        }
+        pool.query(`Select
+        b.bookingId,
+        bookingCode, 
+        instructions,
+        frequency,
+        b.bookingDate,
+        hours, 
+        professionals, 
+        includeMaterial, 
+        professionalId, 
+        subTotal, 
+        tax, 
+        voucherPrice, 
+        serviceFee, 
+        materialCost, 
+        netTotal, 
+        voucherCode, 
+        paymentMethod, 
+        userMethodId, 
+        b.serviceDate, 
+        b.status, 
+        cancelReason,
+        cancelledAt, 
+        b.updateAt,
+        
+        i.id, 
+        i.serviceId, 
+        qty, 
+        price, 
+        isSubService,
+        
+        b.userId,
+        u.name as username,
+        u.gender,
+        u.phone,
+        u.email,
+        u.latitude,
+        u.longitude,
+        u.imageUrl,
+        u.fcmToken,
+        
+        addressId, 
+        a.latitude as addressLatitude,
+        a.longitude as addressLongitude,
+        a.description as addressDescription,
+
+        s.staffId,
+        s.name as staffName,
+        s.phone as staffPhone,
+        s.email as staffEmail,
+        s.gender as staffGender,
+        s.imageUrl as staffImageUrl,
+        s.fcmToken as staffFcmToken,
+        s.role,
+        
+        t.id as taskId,
+        t.title as taskTitle,
+        t.description as taskDescription,
+        t.status as taskStatus,
+        t.createAt as taskCreateAt,
+        t.completeAt as taskCompleteAt
+       
+        from bookings b 
+        left join booking_items i on b.bookingId = i.bookingId
+        left join users u on b.userId = u.id
+        left join addresses a on b.addressId = a.id
+        left join staff s on b.professionalId = s.staffId
+        left join tasks t on b.bookingId = t.bookingId
+         where bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
          [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
             if(error)
                 {
                     return callback(error);
                 }
-            else
-            {
-                var bookings = [];
-                var items = results;
-                for(var row of items)
+                else
                 {
-                    let booking = bookings.find((c) => c.bookingId === row.bookingId);
-                    if (!booking){
-                        let user = null;
-                        let address = null;
-                        let staff = null;
-                        if(row.staffId)
-                        {
-                            staff = {
-                                staffId : row.staffId,
-                                name : row.staffName,
-                                gender : row.staffGender,
-                                email : row.staffEmail,
-                                longitude : row.longitude,
-                                imageUrl : row.staffImageUrl,
-                                fcmToken: row.staffFcmToken,
-                            };
-                        }
-                        if(row.addressLatitude)
-                        {
-                            address = {
-                                id : row.addressId,
-                                userId : row.userId,
-                                latitude : row.addressLatitude,
-                                longitude: row.addressLongitude,
-                                description : row.addressDescription,
-                            };
-                        }
-                        if(row.username)
-                        {
-                            user = {
-                                id : row.userId,
-                                name : row.username,
-                                gender : row.gender,
-                                email : row.email,
-                                phone : row.phone,
-                                latitude : row.latitude,
-                                longitude : row.longitude,
-                                imageUrl : row.imageUrl,
-                                fcmToken: row.fcmToken,
-
-                            };
-                        }
-                        booking = {
-                            bookingId: row.bookingId,
-                            professionalId: row.professionalId,
-                            userId: row.userId,
-                            addressId: row.addressId,
-                            bookingCode: row.bookingCode,
-                            instructions: row.instructions,
-                            frequency : row.frequency,
-                            bookingDate: row.bookingDate,
-                            hours: row.hours,
-                            professionals: row.professionals,
-                            includeMaterial: row.includeMaterial,
-                            subTotal: row.subTotal,
-                            tax: row.tax,
-                            voucherPrice: row.voucherPrice,
-                            serviceFee: row.serviceFee,
-                            materialCost: row.materialCost,
-                            netTotal: row.netTotal,
-                            voucherCode: row.voucherCode,
-                            paymentMethod: row.paymentMethod,
-                            userMethodId: row.userMethodId,
-                            serviceDate: row.serviceDate,
-                            status: row.status,
-                            cancelReason: row.cancelReason,
-                            cancelledAt: row.cancelledAt,
-                            updateAt: row.updateAt,
-                            user : user,
-                            address : address,
-                            staff : staff,
-                            items: []
-                        };
-                        bookings.push(booking);
-                    }
-                    if(row.id != null)
+                    var bookings = [];
+                    var items = results;
+                    for(var row of items)
                     {
-                        let item = booking.items.find((s) => s.id === row.id);
-
-                        if (!item) {
-                            item = {
-                                id: row.id,
+                        let booking = bookings.find((c) => c.bookingId === row.bookingId);
+                        if (!booking){
+                            let user = null;
+                            let address = null;
+                            let staff = null;
+                            if(row.staffId)
+                            {
+                                staff = {
+                                    staffId : row.staffId,
+                                    name : row.staffName,
+                                    gender : row.staffGender,
+                                    email : row.staffEmail,
+                                    phone : row.staffPhone,
+                                    imageUrl : row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role : row.role
+                                };
+                            }
+                            if(row.addressLatitude)
+                            {
+                                address = {
+                                    id : row.addressId,
+                                    userId : row.userId,
+                                    latitude : row.addressLatitude,
+                                    longitude: row.addressLongitude,
+                                    description : row.addressDescription,
+                                };
+                            }
+                            if(row.username)
+                            {
+                                user = {
+                                    id : row.userId,
+                                    name : row.username,
+                                    gender : row.gender,
+                                    email : row.email,
+                                    phone : row.phone,
+                                    latitude : row.latitude,
+                                    longitude : row.longitude,
+                                    imageUrl : row.imageUrl,
+                                    fcmToken: row.fcmToken,
+    
+                                };
+                            }
+                            booking = {
                                 bookingId: row.bookingId,
-                                serviceId: row.serviceId,
+                                professionalId: row.professionalId,
                                 userId: row.userId,
-                                qty: row.qty,
-                                price: row.price,
-                                isSubService: row.isSubService,
+                                addressId: row.addressId,
+                                bookingCode: row.bookingCode,
+                                instructions: row.instructions,
+                                frequency : row.frequency,
                                 bookingDate: row.bookingDate,
+                                hours: row.hours,
+                                professionals: row.professionals,
+                                includeMaterial: row.includeMaterial,
+                                subTotal: row.subTotal,
+                                tax: row.tax,
+                                voucherPrice: row.voucherPrice,
+                                serviceFee: row.serviceFee,
+                                materialCost: row.materialCost,
+                                netTotal: row.netTotal,
+                                voucherCode: row.voucherCode,
+                                paymentMethod: row.paymentMethod,
+                                userMethodId: row.userMethodId,
                                 serviceDate: row.serviceDate,
+                                status: row.status,
+                                cancelReason: row.cancelReason,
+                                cancelledAt: row.cancelledAt,
+                                updateAt: row.updateAt,
+                                user : user,
+                                address : address,
+                                staff : staff,
+                                items: [], 
+                                tasks: []
                             };
-                            booking.items.push(item);
+                            bookings.push(booking);
                         }
-                
+                        if(row.id != null)
+                        {
+                            let item = booking.items.find((s) => s.id === row.id);
+    
+                            if (!item) {
+                                item = {
+                                    id: row.id,
+                                    bookingId: row.bookingId,
+                                    serviceId: row.serviceId,
+                                    userId: row.userId,
+                                    qty: row.qty,
+                                    price: row.price,
+                                    isSubService: row.isSubService,
+                                    bookingDate: row.bookingDate,
+                                    serviceDate: row.serviceDate,
+                                };
+                                booking.items.push(item);
+                            }
+                    
+                        }
+    
+                        if(row.taskId != null)
+                        {
+                            let task = booking.tasks.find((s) => s.id === row.taskId);
+    
+                            if (!task) {
+                                task = {
+                                    id: row.taskId,
+                                    bookingId: row.bookingId,
+                                    title: row.taskTitle,
+                                    description: row.taskDescription,
+                                    status: row.taskStatus,
+                                    createAt: row.taskCreateAt,
+                                    completeAt: row.taskCompleteAt
+                                };
+                                booking.tasks.push(task);
+                            }
+                    
+                        }
+                    
                 }
-                
-            }
-            return callback(null, bookings);
-            }
+                return callback(null, bookings);
+                }
          });
     },
 

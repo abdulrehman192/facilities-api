@@ -115,7 +115,7 @@ module.exports = {
             });
         }
 
-        updateFcm(request, (error, results) => {
+        updateFcm(request.body, (error, results) => {
             if(error)
             {
                 return response.status(500).json({

@@ -1,5 +1,5 @@
 const { response } = require("express");
-const  {create, update, deleteBooking, getAllUserBookings, cancelBooking, updateBookingStatus, getAllBookings} = require("./booking.service");
+const  {create, update, deleteBooking, getAllUserBookings, getAllProfessionalBookings,cancelBooking, updateBookingStatus, getAllBookings} = require("./booking.service");
 var errorMessage = "Error while connecting to database server";
 module.exports = {
     createBooking : (request, response) =>{
@@ -141,6 +141,32 @@ module.exports = {
             });
         }
         getAllUserBookings(body, (error, results) =>{
+        if(error)
+            {
+    
+                return response.status(500).json({
+                    success : 0,
+                    message : errorMessage
+                });
+            }
+
+            return response.status(200).json({
+                success : 1,
+                data : results
+            });
+       });
+    },
+
+    getAllProfessionalBookings : (request, response) =>{
+        const body = request.body;
+        if(!body.professionalId)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "professionalId is required"
+            });
+        }
+        getAllProfessionalBookings(body, (error, results) =>{
         if(error)
             {
     

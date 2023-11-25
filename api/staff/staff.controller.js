@@ -85,7 +85,7 @@ module.exports = {
             });
         }
 
-        updateFcm(request, (error, results) => {
+        updateFcm(request.body, (error, results) => {
             if(error)
             {
                 return response.status(500).json({
@@ -136,7 +136,6 @@ module.exports = {
                     message : error
                 });
             }
-            console.log(results);
             if(results.length <= 0)
             {
                 return response.status(404).json({
@@ -157,7 +156,6 @@ module.exports = {
     },
     getAllStaffAccounts : (request, response) => {
 
-        console.log(request.params);
         getStaff(request.body, (error, results) =>{
             if(error)
             {

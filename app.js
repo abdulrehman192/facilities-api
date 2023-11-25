@@ -53,6 +53,9 @@ const reviewsRouter = require("./api/reviews/review.router");
 const vouchersRouter = require("./api/vouchers/voucher.router");
 const bookingsRouter = require("./api/bookings/booking.router");
 const staffRouter = require("./api/staff/staff.router");
+const taskRouter = require("./api/tasks/task.router");
+const notificationRouter = require("./api/notifications/notification.router");
+const checkRouter = require("./api/staff-check-activities/activity.router");
 
 
 app.use("/api/auth", userRouter);
@@ -66,6 +69,9 @@ app.use("/api", vouchersRouter);
 app.use("/api/user", reviewsRouter);
 app.use("/api/user", bookingsRouter);
 app.use("/api/staff", staffRouter);
+app.use("/api/tasks", taskRouter);
+app.use("/api/notifications", notificationRouter);
+app.use("/api/checks", checkRouter);
 
 app.listen(process.env.APP_PORT || 4000, ()=> {
     console.log("Server is running on port : ", process.env.APP_PORT);
