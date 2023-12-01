@@ -1,4 +1,4 @@
-const { createUser, getAllStaffAccounts, updateStaffAccount, updateStaffFcm, sendNotification, deleteStaffAccount, getOneStaffAccountById, staffLogin, createStaffAccount } = require("./staff.controller");
+const { createUser, getAllStaffAccounts, updatePassword, updateStaffAccount, updateStaffFcm, sendNotification, deleteStaffAccount, getOneStaffAccountById, staffLogin, createStaffAccount } = require("./staff.controller");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/validation-token");
 const multer = require('multer');
@@ -48,6 +48,7 @@ router.post("/get-all-staff-accounts", checkToken, getAllStaffAccounts);
 router.post("/get-one-staff-by-id", checkToken, getOneStaffAccountById);
 router.post("/staffLogin", staffLogin);
 router.post("/update-fcm", checkToken, updateStaffFcm);
+router.post("/update-password", checkToken, updatePassword);
 router.post("/send-notifications", sendNotification);
 
 module.exports = router;

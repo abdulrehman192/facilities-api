@@ -1,5 +1,5 @@
 
-const  {create, deleteStaff, getStaff, update, getStaffById, getStaffByPhone, updateFcm, sendNotification} = require("./staff.service");
+const  {create, deleteStaff, updatePassword, getStaff, update, getStaffById, getStaffByPhone, updateFcm, sendNotification} = require("./staff.service");
 const { sign } = require("jsonwebtoken");
 
 
@@ -101,6 +101,40 @@ module.exports = {
         });
     },
 
+    updatePassword: (request, response) => {
+
+        if(!request.body.staffId)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "staffId is required to update data"
+            });
+        }
+
+        if(!request.body.password)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "password is required to update data"
+            });
+        }
+
+        updatePassword(request.body, (error, results) => {
+            if(error)
+            {
+                return response.status(500).json({
+                    success : 0,
+                    message : error
+                });
+            }
+
+            return response.status(200).json({
+                success : 1,
+                message : "Staff password successfully updated"
+            });
+        });
+    },
+
     deleteStaffAccount : (request, response) =>{
         if(!request.body.staffId)
         {
@@ -182,11 +216,19 @@ module.exports = {
     },
     staffLogin : (request, response) => {
         var body = request.body;
-        if(!body.phone)
+        if(!body.email)
         {
             return response.status(400).json({
                 success : 0,
-                message: "phone is required to login"
+                message: "email is required to login"
+            });
+        }
+
+        if(!body.password)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "password is required to login"
             });
         }
         getStaffByPhone(body, (error, results) => {

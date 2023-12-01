@@ -2,6 +2,22 @@ const pool = require("../../config/database");
 const axios = require('axios');
 var errorMessage = "Error while connecting to database server";
 
+const CryptoJS = require('crypto-js');
+
+// Replace these values with your own secret key
+const secretKey = 'facilities';
+
+// Function to encrypt a string
+function encrypt(text) {
+  const encrypted = CryptoJS.AES.encrypt(text, secretKey).toString();
+  return encrypted;
+}
+
+// Function to decrypt an encrypted string
+function decrypt(encryptedText) {
+  const decrypted = CryptoJS.AES.decrypt(encryptedText, secretKey).toString(CryptoJS.enc.Utf8);
+  return decrypted;
+}
 
 module.exports = {
     create : (req, callback) => {
@@ -16,7 +32,7 @@ module.exports = {
         {
             imageUrl = fileUrls[0];
         }
-        pool.query(`select * from staff where phone = ?`, [data.phone], (error, result, fields) => {
+        pool.query(`select * from staff where email = ?`, [data.email], (error, result, fields) => {
             if(error)
             {
                 return callback(errorMessage);
@@ -24,10 +40,11 @@ module.exports = {
             if(result.length <= 0)
             {
     
-                pool.query(`Insert into staff (phone, email, gender, role, imageUrl, name, fcmToken, createAt) values (?,?,?,?,?,?,?,?)`, 
+                pool.query(`Insert into staff (phone, email, password, gender, role, imageUrl, name, fcmToken, createAt) values (?,?,?,?,?,?,?,?,?)`, 
                 [
                     data.phone, 
                     data.email, 
+                    data.password,
                     data.gender, 
                     data.role, 
                     imageUrl, 
@@ -47,7 +64,7 @@ module.exports = {
                 });
             }
             else{
-                return callback("Staff account already exists with this phone number. Please login instead");
+                return callback("Staff account already exists with this email. Please login instead");
             }
         });
        
@@ -117,7 +134,7 @@ module.exports = {
                 }
             }
             else{
-                return callback("Staff Account already exists with this phone number. Please use another number or login with this number");
+                return callback("Staff Account already exists with this email. Please use another number or login with this number");
             }
 
         });
@@ -164,7 +181,7 @@ module.exports = {
         );
     },
     getStaffByPhone : (data, callback) =>{
-        pool.query("Select * from staff where phone = ?  ", [data.phone], (error, result, fields)=> {
+        pool.query("Select * from staff where email = ? and password ", [data.email, data.password], (error, result, fields)=> {
             if(error)
             {
                 return callback(errorMessage);
@@ -178,6 +195,23 @@ module.exports = {
         pool.query(`Update staff set fcmToken = ? where staffId = ?`, 
         [
             data.fcmToken, 
+            data.staffId,
+        ],
+        (error, result, fields) => 
+        {
+            if(error)
+            {
+                console.log("Here is the error");
+                return callback(errorMessage);
+            }
+            return callback(null, result);
+        });
+    },
+
+    updatePassword: (data, callback) =>{
+        pool.query(`Update staff set password = ? where staffId = ?`, 
+        [
+            data.password, 
             data.staffId,
         ],
         (error, result, fields) => 
