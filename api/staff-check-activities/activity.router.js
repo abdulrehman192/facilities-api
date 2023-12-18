@@ -3,8 +3,8 @@ const { createCheck, updateCheck, getMyCheckHistory, getStaffCheckHistory } = re
 const router = require("express").Router();
 const { checkToken } = require("../../auth/validation-token");
 
-router.post("/create-check", checkToken, createCheck);
-router.patch("/update-check", checkToken, updateCheck);
+router.post("/check-in", checkToken, createCheck);
+router.patch("/check-out", checkToken, updateCheck);
 router.delete("/get-my-check-history", checkToken, getMyCheckHistory);
 router.delete("/get-staff-check-history", checkToken, getStaffCheckHistory);
 

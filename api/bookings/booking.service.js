@@ -95,65 +95,71 @@ module.exports = {
             text = "";
         }
         pool.query(`Select
-         b.bookingId,
-         bookingCode, 
-         instructions,
-         frequency,
-         b.bookingDate,
-         hours, 
-         professionals, 
-         includeMaterial, 
-         professionalId, 
-         subTotal, 
-         tax, 
-         voucherPrice, 
-         serviceFee, 
-         materialCost, 
-         netTotal, 
-         voucherCode, 
-         paymentMethod, 
-         userMethodId, 
-         b.serviceDate, 
-         status, 
-         cancelReason,
-         cancelledAt, 
-         b.updateAt,
-         
-         i.id, 
-         i.serviceId, 
-         qty, 
-         price, 
-         isSubService,
-         
-         b.userId,
-         u.name as username,
-         u.gender,
-         u.phone,
-         u.email,
-         u.latitude,
-         u.longitude,
-         u.imageUrl,
-         u.fcmToken,
-         
-         addressId, 
-         a.latitude as addressLatitude,
-         a.longitude as addressLongitude,
-         a.description as addressDescription,
+        b.bookingId,
+        bookingCode, 
+        instructions,
+        frequency,
+        b.bookingDate,
+        hours, 
+        professionals, 
+        includeMaterial, 
+        professionalId, 
+        subTotal, 
+        tax, 
+        voucherPrice, 
+        serviceFee, 
+        materialCost, 
+        netTotal, 
+        voucherCode, 
+        paymentMethod, 
+        userMethodId, 
+        b.serviceDate, 
+        status, 
+        cancelReason,
+        cancelledAt, 
+        b.updateAt,
+        
+        i.id, 
+        i.serviceId, 
+        qty, 
+        price, 
+        isSubService,
+        
+        b.userId,
+        u.name as username,
+        u.gender,
+        u.phone,
+        u.email,
+        u.latitude,
+        u.longitude,
+        u.imageUrl,
+        u.fcmToken,
+        
+        addressId, 
+        a.latitude as addressLatitude,
+        a.longitude as addressLongitude,
+        a.description as addressDescription,
 
-         s.staffId,
-         s.name as staffName,
-         s.phone as staffPhone,
-         s.email as staffEmail,
-         s.gender as staffGender,
-         s.imageUrl as staffImageUrl,
-         s.fcmToken as staffFcmToken,
-         s.role
-         
-         from bookings b 
-         left join booking_items i on b.bookingId = i.bookingId
-         left join users u on b.userId = u.id
-         left join addresses a on b.addressId = a.id
-         left join staff s on b.professionalId = s.staffId
+        s.staffId,
+        s.name as staffName,
+        s.phone as staffPhone,
+        s.email as staffEmail,
+        s.gender as staffGender,
+        s.imageUrl as staffImageUrl,
+        s.fcmToken as staffFcmToken,
+        s.role,
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation
+        
+        from bookings b 
+        left join booking_items i on b.bookingId = i.bookingId
+        left join users u on b.userId = u.id
+        left join addresses a on b.addressId = a.id
+        left join staff s on b.professionalId = s.staffId
+        left join staff_check_activities c on b.bookingId = c.bookingId
          where b.userId = ? and bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
          [data.userId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
@@ -240,7 +246,8 @@ module.exports = {
                                 address : address,
                                 staff : staff,
                                 items: [], 
-                                tasks: []
+                                tasks: [],
+                                check_activities: []
                             };
                             bookings.push(booking);
                         }
@@ -283,6 +290,25 @@ module.exports = {
                             }
                     
                         }
+
+                        if(row.checkId != null)
+                        {
+                            let activity = booking.check_activities.find((c) => c.id === row.checkId);
+    
+                            if (!activity) {
+                                activity = {
+                                    id: row.checkId,
+                                    bookingId: row.bookingId,
+                                    staffId: row.staffId,
+                                    checkedIn: row.checkedIn,
+                                    checkedInLocation: row.checkedInLocation,
+                                    checkedOut: row.checkedOut,
+                                    checkedOutLocation: row.checkedOutLocation,
+                                };
+                                booking.check_activities.push(activity);
+                            }
+                    
+                        }
                     
                 }
                 return callback(null, bookings);
@@ -297,65 +323,71 @@ module.exports = {
             text = "";
         }
         pool.query(`Select
-         b.bookingId,
-         bookingCode, 
-         instructions,
-         frequency,
-         b.bookingDate,
-         hours, 
-         professionals, 
-         includeMaterial, 
-         professionalId, 
-         subTotal, 
-         tax, 
-         voucherPrice, 
-         serviceFee, 
-         materialCost, 
-         netTotal, 
-         voucherCode, 
-         paymentMethod, 
-         userMethodId, 
-         b.serviceDate, 
-         status, 
-         cancelReason,
-         cancelledAt, 
-         b.updateAt,
-         
-         i.id, 
-         i.serviceId, 
-         qty, 
-         price, 
-         isSubService,
-         
-         b.userId,
-         u.name as username,
-         u.gender,
-         u.phone,
-         u.email,
-         u.latitude,
-         u.longitude,
-         u.imageUrl,
-         u.fcmToken,
-         
-         addressId, 
-         a.latitude as addressLatitude,
-         a.longitude as addressLongitude,
-         a.description as addressDescription,
+        b.bookingId,
+        bookingCode, 
+        instructions,
+        frequency,
+        b.bookingDate,
+        hours, 
+        professionals, 
+        includeMaterial, 
+        professionalId, 
+        subTotal, 
+        tax, 
+        voucherPrice, 
+        serviceFee, 
+        materialCost, 
+        netTotal, 
+        voucherCode, 
+        paymentMethod, 
+        userMethodId, 
+        b.serviceDate, 
+        status, 
+        cancelReason,
+        cancelledAt, 
+        b.updateAt,
+        
+        i.id, 
+        i.serviceId, 
+        qty, 
+        price, 
+        isSubService,
+        
+        b.userId,
+        u.name as username,
+        u.gender,
+        u.phone,
+        u.email,
+        u.latitude,
+        u.longitude,
+        u.imageUrl,
+        u.fcmToken,
+        
+        addressId, 
+        a.latitude as addressLatitude,
+        a.longitude as addressLongitude,
+        a.description as addressDescription,
 
-         s.staffId,
-         s.name as staffName,
-         s.phone as staffPhone,
-         s.email as staffEmail,
-         s.gender as staffGender,
-         s.imageUrl as staffImageUrl,
-         s.fcmToken as staffFcmToken,
-         s.role
-         
-         from bookings b 
-         left join booking_items i on b.bookingId = i.bookingId
-         left join users u on b.userId = u.id
-         left join addresses a on b.addressId = a.id
-         left join staff s on b.professionalId = s.staffId
+        s.staffId,
+        s.name as staffName,
+        s.phone as staffPhone,
+        s.email as staffEmail,
+        s.gender as staffGender,
+        s.imageUrl as staffImageUrl,
+        s.fcmToken as staffFcmToken,
+        s.role,
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation
+        
+        from bookings b 
+        left join booking_items i on b.bookingId = i.bookingId
+        left join users u on b.userId = u.id
+        left join addresses a on b.addressId = a.id
+        left join staff s on b.professionalId = s.staffId
+        left join staff_check_activities c on b.bookingId = c.bookingId
          where b.professionalId = ? and (bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? ) order by b.serviceDate desc`,
          [data.professionalId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
@@ -442,7 +474,8 @@ module.exports = {
                                 address : address,
                                 staff : staff,
                                 items: [], 
-                                tasks: []
+                                tasks: [],
+                                check_activities: []
                             };
                             bookings.push(booking);
                         }
@@ -485,6 +518,26 @@ module.exports = {
                             }
                     
                         }
+
+                        if(row.checkId != null)
+                        {
+                            let activity = booking.check_activities.find((c) => c.id === row.checkId);
+    
+                            if (!activity) {
+                                activity = {
+                                    id: row.checkId,
+                                    bookingId: row.bookingId,
+                                    staffId: row.staffId,
+                                    checkedIn: row.checkedIn,
+                                    checkedInLocation: row.checkedInLocation,
+                                    checkedOut: row.checkedOut,
+                                    checkedOutLocation: row.checkedOutLocation,
+                                };
+                                booking.check_activities.push(activity);
+                            }
+                    
+                        }
+                        
                     
                 }
                 return callback(null, bookings);
@@ -518,7 +571,7 @@ module.exports = {
         paymentMethod, 
         userMethodId, 
         b.serviceDate, 
-        b.status, 
+        status, 
         cancelReason,
         cancelledAt, 
         b.updateAt,
@@ -552,20 +605,18 @@ module.exports = {
         s.imageUrl as staffImageUrl,
         s.fcmToken as staffFcmToken,
         s.role,
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation
         
-        t.id as taskId,
-        t.title as taskTitle,
-        t.description as taskDescription,
-        t.status as taskStatus,
-        t.createAt as taskCreateAt,
-        t.completeAt as taskCompleteAt
-       
         from bookings b 
         left join booking_items i on b.bookingId = i.bookingId
         left join users u on b.userId = u.id
         left join addresses a on b.addressId = a.id
         left join staff s on b.professionalId = s.staffId
-        left join tasks t on b.bookingId = t.bookingId
+        left join staff_check_activities c on b.bookingId = c.bookingId
          where bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
          [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
@@ -652,7 +703,8 @@ module.exports = {
                                 address : address,
                                 staff : staff,
                                 items: [], 
-                                tasks: []
+                                tasks: [],
+                                check_activities : []
                             };
                             bookings.push(booking);
                         }
@@ -692,6 +744,25 @@ module.exports = {
                                     completeAt: row.taskCompleteAt
                                 };
                                 booking.tasks.push(task);
+                            }
+                    
+                        }
+
+                        if(row.checkId != null)
+                        {
+                            let activity = booking.check_activities.find((c) => c.id === row.checkId);
+    
+                            if (!activity) {
+                                activity = {
+                                    id: row.checkId,
+                                    bookingId: row.bookingId,
+                                    staffId: row.staffId,
+                                    checkedIn: row.checkedIn,
+                                    checkedInLocation: row.checkedInLocation,
+                                    checkedOut: row.checkedOut,
+                                    checkedOutLocation: row.checkedOutLocation,
+                                };
+                                booking.check_activities.push(activity);
                             }
                     
                         }
