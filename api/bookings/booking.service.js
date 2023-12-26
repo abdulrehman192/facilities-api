@@ -850,7 +850,7 @@ module.exports = {
         left join addresses a on b.addressId = a.id
         left join staff s on b.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
-         where serviceDate between ? and ? order by b.serviceDate desc`,
+         where b.serviceDate between ? and ? order by b.serviceDate desc`,
          [startDate, endDate], 
          (error, results, fields)=> {
             if(error)
