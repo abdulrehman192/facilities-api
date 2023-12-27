@@ -1,5 +1,5 @@
 
-const  {create, deleteStaff, updatePassword, getStaff, update, getStaffById, getStaffByPhone, updateFcm, sendNotification} = require("./staff.service");
+const  {create, deleteStaff, sendBookingNotification, updatePassword, getStaff, update, getStaffById, getStaffByPhone, updateFcm, sendNotification} = require("./staff.service");
 const { sign } = require("jsonwebtoken");
 
 
@@ -282,6 +282,40 @@ module.exports = {
             });
         }
        sendNotification(body, (error, results) =>{
+        if(error)
+            {
+    
+                return response.status(500).json({
+                    success : 0,
+                    message : error
+                });
+            }
+
+            return response.status(200).json({
+                success : 1,
+                message: results,
+            });
+       });
+    },
+
+    sendBookingNotification: (request, response) => {
+        const body = request.body;
+        if(!body.title)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "title is required to send notification"
+            });
+        }
+
+        if(!body.body)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "body is required to send notification"
+            });
+        }
+        sendBookingNotification(body, (error, results) =>{
         if(error)
             {
     

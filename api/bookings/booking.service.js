@@ -782,7 +782,7 @@ module.exports = {
     getDateWiseBookings : (data, callback) => {
         var startDate = data.startDate;
         var endDate = data.endDate;
-        
+        console.log(startDate, endDate);
         pool.query(`Select
         b.bookingId,
         bookingCode, 
@@ -850,8 +850,8 @@ module.exports = {
         left join addresses a on b.addressId = a.id
         left join staff s on b.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
-         where b.serviceDate between ? and ? order by b.serviceDate desc`,
-         [startDate, endDate], 
+         where status != 'Cancelled' and b.serviceDate between ? and ? order by b.serviceDate desc`,
+         [`${startDate}`, `${endDate}`], 
          (error, results, fields)=> {
             if(error)
                 {
@@ -1031,5 +1031,7 @@ module.exports = {
                }
            return callback(null, results);
         });
-    }
+    },
+
+    
 }
