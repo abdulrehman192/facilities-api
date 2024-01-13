@@ -7,10 +7,17 @@ module.exports = {
             const now = new Date();
             data.createAt = now;
             var items = [];
+            var professionals = [];
             if(data.items)
             {
                 
               items = JSON.parse(data.items);
+            }
+
+            if(data.professionals)
+            {
+                
+                professionals = JSON.parse(data.professionals);
             }
             
             var query = `insert into bookings (bookingCode, userId, instructions, frequency, bookingDate, serviceDate, hours, professionals, includeMaterial, professionalId, subTotal, tax, voucherPrice, serviceFee, materialCost, netTotal, voucherCode, paymentMethod, userMethodId, status, addressId, discount) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
@@ -43,8 +50,22 @@ module.exports = {
                                 
                             });
                         }
+
+                        for(var professional of professionals)
+                        {
+                            query = `insert into booking_professionals(bookingId, professionalId, assignDate, modifiedAt) values(?,?,?,?)`;
+                            fields = [bookingId, professional.professionalId, data.createAt, data.createAt];
+                            pool.query(query, fields, (error, results, fields)=>{
+                                if(error)
+                                {
+                                    return callback(error);
+                                }
+                                
+                            });
+                        }
                     }
                     );
+
                     return callback(null, results);
                 }
              });
@@ -84,6 +105,14 @@ module.exports = {
                            return callback(error);
                        }
                 });    
+                pool.query(`delete from booking_professionals where bookingId = ?`,
+                [data.id], 
+                (error, results, fields)=> {
+                   if(error)
+                       {
+                           return callback(error);
+                       }
+                });  
             return callback(null, results);
          });
     },
@@ -1033,5 +1062,32 @@ module.exports = {
         });
     },
 
-    
+    updateBookingProfessional: (data, callback) =>{
+        const now = new Date();
+        data.modifiedAt = now;
+        pool.query(`update booking_professionals set professionalId = ?, modifiedAt = ? where id = ?`,
+        [data.professionalId, data.modifiedAt, data.id], 
+        (error, results, fields)=> {
+           if(error)
+               {
+                   return callback(error);
+               }
+           return callback(null, results);
+        });
+    },
+
+    deleteBookingProfessional: (data, callback) =>{
+        const now = new Date();
+        data.modifiedAt = now;
+        pool.query(`delete form booking_professionals where id = ?`,
+        [data.id], 
+        (error, results, fields)=> {
+           if(error)
+               {
+                   return callback(error);
+               }
+           return callback(null, results);
+        });
+    },
+
 }
