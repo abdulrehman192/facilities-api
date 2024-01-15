@@ -166,7 +166,6 @@ module.exports = {
                     message : error
                 });
             }
-            console.log(results);
             if(results.length <= 0)
             {
                 return response.status(404).json({
@@ -186,8 +185,6 @@ module.exports = {
         
     },
     getAllUsers : (request, response) => {
-
-        console.log(request.params);
         getUsers(request.body, (error, results) =>{
             if(error)
             {

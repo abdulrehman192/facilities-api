@@ -5,7 +5,7 @@ const pool = require("../../config/database");
 module.exports = {
     create :(data, callback) => {
             const now = new Date();
-            data.createAt = now;
+            data.updateAt = now;
             var items = [];
             var professionals = [];
             if(data.items)
@@ -14,24 +14,24 @@ module.exports = {
               items = JSON.parse(data.items);
             }
 
-            if(data.professionals)
+            if(data.staff)
             {
                 
-                professionals = JSON.parse(data.professionals);
+                professionals = JSON.parse(data.staff);
             }
             
-            var query = `insert into bookings (bookingCode, userId, instructions, frequency, bookingDate, serviceDate, hours, professionals, includeMaterial, professionalId, subTotal, tax, voucherPrice, serviceFee, materialCost, netTotal, voucherCode, paymentMethod, userMethodId, status, addressId, discount) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-            var fields = [data.bookingCode, data.userId, data.instructions, data.frequency, data.bookingDate, data.serviceDate, data.hours, data.professionals, data.includeMaterial, data.professionalId, data.subTotal, data.tax, data.voucherPrice, data.serviceFee, data.materialCost, data.netTotal, data.voucherCode, data.paymentMethod, data.userMethodId, data.status, data.addressId, data.discount];
+            var query = `insert into bookings (bookingCode, userId, addressId, instructions, frequency, hours, professionals, includeMaterial, voucherCode, subTotal, tax, voucherPrice, serviceFee, materialCost, creditPoints, discount, netTotal, discountDescription, paymentMethod, userMethodId, paymentRemarks, serviceDate, status, createAt, updateAt) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            var fields = [data.bookingCode, data.userId, data.addressId, data.instructions, data.frequency, data.hours, data.professionals, data.includeMaterial, data.voucherCode, data.subTotal, data.tax, data.voucherPrice, data.serviceFee, data.materialCost, data.creditPoints, data.discount, data.netTotal, data.discountDescription, data.paymentMethod, data.userMethodId, data.paymentRemarks, data.serviceDate, data.status, data.createAt, data.updateAt];
             
             pool.query(query, fields, 
              (error, results, fields)=> {
                 if(error)
                     {
-                        console.log("Error here");
+                        console.log(error);
                         return callback(error);
                     }
                 else{
-                    pool.query(`select bookingId from bookings where userId = ? and bookingDate = ? and serviceDate = ? and subTotal = ? `, [data.userId, data.bookingDate, data.serviceDate, data.subTotal],
+                    pool.query(`select bookingId from bookings where userId = ? and createAt = ? and serviceDate = ? and subTotal = ? `, [data.userId, data.createAt, data.serviceDate, data.subTotal],
                     (error, results, fields)=> {
                         if(error)
                         {
@@ -53,14 +53,14 @@ module.exports = {
 
                         for(var professional of professionals)
                         {
-                            query = `insert into booking_professionals(bookingId, professionalId, assignDate, modifiedAt) values(?,?,?,?)`;
+                            query = `insert into booking_professionals (bookingId, professionalId, assignDate, modifiedAt) values(?,?,?,?)`;
                             fields = [bookingId, professional.professionalId, data.createAt, data.createAt];
-                            pool.query(query, fields, (error, results, fields)=>{
+                            pool.query(query, fields, (error, x, fields)=>{
                                 if(error)
                                 {
+                                    console.log("Here is the fucking error");
                                     return callback(error);
                                 }
-                                
                             });
                         }
                     }
@@ -70,25 +70,46 @@ module.exports = {
                 }
              });
     },
+
     update : (data, callback) => {
         const now = new Date();
         data.updateAt = now;
-        var items = [];
-        if(data.items)
-        {
+            var items = [];
+            var professionals = [];
+            if(data.items)
+            {
+                
+              items = JSON.parse(data.items);
+            }
+
+            if(data.professionals)
+            {
+                
+                professionals = JSON.parse(data.staff);
+            }
             
-          items = JSON.parse(data.items);
-        }
-        pool.query(`update bookings set instructions = ?, hours = ?, professionals = ?, includeMaterial = ?, subTotal = ?, tax = ?, voucherPrice = ?, serviceFee = ?, materialCost = ?, netTotal = ?, voucherCode = ?, addressId = ?, professionalId = ?, updateAt = ?, discount = ? where bookingId = ?`,
-         [data.instructions, data.hours, data.professionals, data.includeMaterial, data.subTotal, data.tax, data.voucherPrice, data.serviceFee, data.materialCost, data.netTotal, data.voucherCode, data.addressId, data.professionalId, data.updateAt, data.discount, data.bookingId], 
-         (error, results, fields)=> {
-            if(error)
-                {
-                    return callback(error);
+            let sql = 'UPDATE bookings SET ';
+            const setClauses = [];
+            
+            for (const key in data) {
+                if (data[key] !== null) {
+                setClauses.push(`${key} = ?`);
                 }
-            return callback(null, results);
-         });
+            }
+            sql += setClauses.join(', '); 
+            sql += ' WHERE bookingId = ?'; 
+            const values = [...Object.values(data).filter(val => val !== null), data.id];
+
+            pool.query(sql, values, 
+                (error, results, fields)=> {
+                    if(error)
+                        {
+                            return callback(errorMessage);
+                        }
+                    return callback(null, results);
+            });
     },
+
     deleteBooking : (data, callback) => {
         pool.query(`delete from bookings where bookingId = ?`,
          [data.id], 
@@ -124,30 +145,34 @@ module.exports = {
             text = "";
         }
         pool.query(`Select
-        b.bookingId,
+        b.bookingId, 
         bookingCode, 
-        instructions,
-        frequency,
-        b.bookingDate,
+        b.userId, 
+        addressId, 
+        instructions, 
+        frequency, 
         hours, 
         professionals, 
         includeMaterial, 
-        professionalId, 
+        voucherCode, 
         subTotal, 
         tax, 
         voucherPrice, 
         serviceFee, 
         materialCost, 
-        discount,
+        b.creditPoints, 
+        discount, 
         netTotal, 
-        voucherCode, 
+        discountDescription, 
         paymentMethod, 
         userMethodId, 
+        paymentRemarks, 
         b.serviceDate, 
-        status, 
-        cancelReason,
-        cancelledAt, 
-        b.updateAt,
+        b.status, 
+        b.createAt, 
+        b.updateAt, 
+        cancelReason, 
+        cancelledAt,
         
         i.id, 
         i.serviceId, 
@@ -160,6 +185,7 @@ module.exports = {
         u.gender,
         u.phone,
         u.email,
+        u.country,
         u.latitude,
         u.longitude,
         u.imageUrl,
@@ -170,6 +196,17 @@ module.exports = {
         a.longitude as addressLongitude,
         a.description as addressDescription,
 
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation,
+        
+        p.id as assignId,
+		professionalId,
+        assignDate,
+        modifiedAt,
+        
         s.staffId,
         s.name as staffName,
         s.phone as staffPhone,
@@ -178,23 +215,36 @@ module.exports = {
         s.imageUrl as staffImageUrl,
         s.fcmToken as staffFcmToken,
         s.role,
-        c.id as checkId,
-        checkedIn,
-        checkedInLocation,
-        checkedOut,
-        checkedOutLocation
+        
+        t.id as taskId, 
+        t.staffId as taskStaffId,
+        title as taskTitle, 
+        t.description as taskDescription, 
+        t.status as taskStatus, 
+        t.createAt as taskCreateAt, 
+        t.completeAt as taskCompleteAt,
+        
+        m.id as paymentMethodId,
+		cardNumber, 
+        expiryDate, 
+        cvv, 
+        m.description as methodDescription
         
         from bookings b 
         left join booking_items i on b.bookingId = i.bookingId
         left join users u on b.userId = u.id
         left join addresses a on b.addressId = a.id
-        left join staff s on b.professionalId = s.staffId
+        left join booking_professionals p on b.bookingId = p.bookingId
+        left join staff s on p.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
-         where b.userId = ? and bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
+        left join tasks t on b.bookingId = t.bookingId
+        left join user_payment_methods m on m.id = b.userMethodId
+        where b.userId = ? and bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
          [data.userId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
             if(error)
                 {
+                    console.log("here is the fucking error");
                     return callback(error);
                 }
                 else
@@ -207,20 +257,8 @@ module.exports = {
                         if (!booking){
                             let user = null;
                             let address = null;
-                            let staff = null;
-                            if(row.staffId)
-                            {
-                                staff = {
-                                    staffId : row.staffId,
-                                    name : row.staffName,
-                                    gender : row.staffGender,
-                                    email : row.staffEmail,
-                                    phone : row.staffPhone,
-                                    imageUrl : row.staffImageUrl,
-                                    fcmToken: row.staffFcmToken,
-                                    role : row.role
-                                };
-                            }
+                            let userPaymentMethod = null;
+                            
                             if(row.addressLatitude)
                             {
                                 address = {
@@ -231,6 +269,7 @@ module.exports = {
                                     description : row.addressDescription,
                                 };
                             }
+
                             if(row.username)
                             {
                                 user = {
@@ -239,6 +278,7 @@ module.exports = {
                                     gender : row.gender,
                                     email : row.email,
                                     phone : row.phone,
+                                    country : row.country,
                                     latitude : row.latitude,
                                     longitude : row.longitude,
                                     imageUrl : row.imageUrl,
@@ -246,36 +286,50 @@ module.exports = {
     
                                 };
                             }
+
+                            if(row.paymentMethodId)
+                            {
+                                userPaymentMethod = {
+                                    id: row.paymentMethodId,
+                                    cardNumber: row.cardNumber,
+                                    expiryDate: row.expiryDate,
+                                    cvv: row.cvv,
+                                    description: row.methodDescription,
+                                };
+                            }
                             booking = {
-                                bookingId: row.bookingId,
-                                professionalId: row.professionalId,
-                                userId: row.userId,
-                                addressId: row.addressId,
-                                bookingCode: row.bookingCode,
-                                instructions: row.instructions,
-                                frequency : row.frequency,
-                                bookingDate: row.bookingDate,
-                                hours: row.hours,
-                                professionals: row.professionals,
-                                includeMaterial: row.includeMaterial,
-                                subTotal: row.subTotal,
-                                tax: row.tax,
-                                voucherPrice: row.voucherPrice,
-                                serviceFee: row.serviceFee,
-                                materialCost: row.materialCost,
-                                discount: row.discount,
-                                netTotal: row.netTotal,
-                                voucherCode: row.voucherCode,
-                                paymentMethod: row.paymentMethod,
-                                userMethodId: row.userMethodId,
-                                serviceDate: row.serviceDate,
-                                status: row.status,
-                                cancelReason: row.cancelReason,
+                                bookingId: row.bookingId, 
+                                bookingCode: row.bookingCode, 
+                                userId: row.userId, 
+                                addressId: row.addressId, 
+                                instructions: row.instructions, 
+                                frequency: row.frequency, 
+                                hours: row.hours, 
+                                professionals: row.professionals, 
+                                includeMaterial: row.includeMaterial, 
+                                voucherCode: row.voucherCode, 
+                                subTotal: row.subTotal, 
+                                tax: row.tax, 
+                                voucherPrice: row.voucherPrice, 
+                                serviceFee: row.serviceFee, 
+                                materialCost: row.materialCost, 
+                                creditPoints: row.creditPoints, 
+                                discount: row.discount, 
+                                netTotal: row.netTotal, 
+                                discountDescription: row.discountDescription, 
+                                paymentMethod: row.paymentMethod, 
+                                userMethodId: row.userMethodId, 
+                                paymentRemarks: row.paymentRemarks, 
+                                serviceDate: row.serviceDate, 
+                                status: row.status, 
+                                createAt: row.createAt, 
+                                updateAt: row.updateAt, 
+                                cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
-                                updateAt: row.updateAt,
                                 user : user,
                                 address : address,
-                                staff : staff,
+                                userPaymentMethod: userPaymentMethod,
+                                staff : [],
                                 items: [], 
                                 tasks: [],
                                 check_activities: []
@@ -295,7 +349,7 @@ module.exports = {
                                     qty: row.qty,
                                     price: row.price,
                                     isSubService: row.isSubService,
-                                    bookingDate: row.bookingDate,
+                                    bookingDate: row.createAt,
                                     serviceDate: row.serviceDate,
                                 };
                                 booking.items.push(item);
@@ -310,7 +364,7 @@ module.exports = {
                             if (!task) {
                                 task = {
                                     id: row.taskId,
-                                    bookingId: row.bookingId,
+                                    staffId: row.taskStaffId,
                                     title: row.taskTitle,
                                     description: row.taskDescription,
                                     status: row.taskStatus,
@@ -337,6 +391,27 @@ module.exports = {
                                     checkedOutLocation: row.checkedOutLocation,
                                 };
                                 booking.check_activities.push(activity);
+                            }
+                    
+                        }
+
+                        if(row.staffId != null)
+                        {
+                            let s = booking.staff.find((c) => c.staffId === row.staffId);
+    
+                            if (!s) {
+                                s = {
+                                    staffId: row.staffId,
+                                    name: row.staffName,
+                                    phone: row.staffPhone,
+                                    email: row.staffEmail,
+                                    gender: row.staffGender,
+                                    imageUrl: row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role: row.role,
+                                    serviceDate: row.serviceDate
+                                };
+                                booking.staff.push(s);
                             }
                     
                         }
@@ -354,30 +429,34 @@ module.exports = {
             text = "";
         }
         pool.query(`Select
-        b.bookingId,
+        b.bookingId, 
         bookingCode, 
-        instructions,
-        frequency,
-        b.bookingDate,
+        b.userId, 
+        addressId, 
+        instructions, 
+        frequency, 
         hours, 
         professionals, 
         includeMaterial, 
-        professionalId, 
+        voucherCode, 
         subTotal, 
         tax, 
         voucherPrice, 
         serviceFee, 
         materialCost, 
-        discount,
+        b.creditPoints, 
+        discount, 
         netTotal, 
-        voucherCode, 
+        discountDescription, 
         paymentMethod, 
         userMethodId, 
+        paymentRemarks, 
         b.serviceDate, 
-        status, 
-        cancelReason,
-        cancelledAt, 
-        b.updateAt,
+        b.status, 
+        b.createAt, 
+        b.updateAt, 
+        cancelReason, 
+        cancelledAt,
         
         i.id, 
         i.serviceId, 
@@ -390,6 +469,7 @@ module.exports = {
         u.gender,
         u.phone,
         u.email,
+        u.country,
         u.latitude,
         u.longitude,
         u.imageUrl,
@@ -400,6 +480,17 @@ module.exports = {
         a.longitude as addressLongitude,
         a.description as addressDescription,
 
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation,
+        
+        p.id as assignId,
+		professionalId,
+        assignDate,
+        modifiedAt,
+        
         s.staffId,
         s.name as staffName,
         s.phone as staffPhone,
@@ -408,18 +499,30 @@ module.exports = {
         s.imageUrl as staffImageUrl,
         s.fcmToken as staffFcmToken,
         s.role,
-        c.id as checkId,
-        checkedIn,
-        checkedInLocation,
-        checkedOut,
-        checkedOutLocation
+        
+        t.id as taskId, 
+        t.staffId as taskStaffId,
+        title as taskTitle, 
+        t.description as taskDescription, 
+        t.status as taskStatus, 
+        t.createAt as taskCreateAt, 
+        t.completeAt as taskCompleteAt,
+        
+        m.id as paymentMethodId,
+		cardNumber, 
+        expiryDate, 
+        cvv, 
+        m.description as methodDescription
         
         from bookings b 
         left join booking_items i on b.bookingId = i.bookingId
         left join users u on b.userId = u.id
         left join addresses a on b.addressId = a.id
-        left join staff s on b.professionalId = s.staffId
+        left join booking_professionals p on b.bookingId = p.bookingId
+        left join staff s on p.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
+        left join tasks t on b.bookingId = t.bookingId
+        left join user_payment_methods m on m.id = b.userMethodId
          where b.professionalId = ? and (bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? ) order by b.serviceDate desc`,
          [data.professionalId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
@@ -437,20 +540,8 @@ module.exports = {
                         if (!booking){
                             let user = null;
                             let address = null;
-                            let staff = null;
-                            if(row.staffId)
-                            {
-                                staff = {
-                                    staffId : row.staffId,
-                                    name : row.staffName,
-                                    gender : row.staffGender,
-                                    email : row.staffEmail,
-                                    phone : row.staffPhone,
-                                    imageUrl : row.staffImageUrl,
-                                    fcmToken: row.staffFcmToken,
-                                    role : row.role
-                                };
-                            }
+                            let userPaymentMethod = null;
+                            
                             if(row.addressLatitude)
                             {
                                 address = {
@@ -461,6 +552,7 @@ module.exports = {
                                     description : row.addressDescription,
                                 };
                             }
+
                             if(row.username)
                             {
                                 user = {
@@ -469,6 +561,7 @@ module.exports = {
                                     gender : row.gender,
                                     email : row.email,
                                     phone : row.phone,
+                                    country : row.country,
                                     latitude : row.latitude,
                                     longitude : row.longitude,
                                     imageUrl : row.imageUrl,
@@ -476,36 +569,50 @@ module.exports = {
     
                                 };
                             }
+
+                            if(row.paymentMethodId)
+                            {
+                                userPaymentMethod = {
+                                    id: row.paymentMethodId,
+                                    cardNumber: row.cardNumber,
+                                    expiryDate: row.expiryDate,
+                                    cvv: row.cvv,
+                                    description: row.methodDescription,
+                                };
+                            }
                             booking = {
-                                bookingId: row.bookingId,
-                                professionalId: row.professionalId,
-                                userId: row.userId,
-                                addressId: row.addressId,
-                                bookingCode: row.bookingCode,
-                                instructions: row.instructions,
-                                frequency : row.frequency,
-                                bookingDate: row.bookingDate,
-                                hours: row.hours,
-                                professionals: row.professionals,
-                                includeMaterial: row.includeMaterial,
-                                subTotal: row.subTotal,
-                                tax: row.tax,
-                                voucherPrice: row.voucherPrice,
-                                serviceFee: row.serviceFee,
-                                materialCost: row.materialCost,
-                                discount : row.discount,
-                                netTotal: row.netTotal,
-                                voucherCode: row.voucherCode,
-                                paymentMethod: row.paymentMethod,
-                                userMethodId: row.userMethodId,
-                                serviceDate: row.serviceDate,
-                                status: row.status,
-                                cancelReason: row.cancelReason,
+                                bookingId: row.bookingId, 
+                                bookingCode: row.bookingCode, 
+                                userId: row.userId, 
+                                addressId: row.addressId, 
+                                instructions: row.instructions, 
+                                frequency: row.frequency, 
+                                hours: row.hours, 
+                                professionals: row.professionals, 
+                                includeMaterial: row.includeMaterial, 
+                                voucherCode: row.voucherCode, 
+                                subTotal: row.subTotal, 
+                                tax: row.tax, 
+                                voucherPrice: row.voucherPrice, 
+                                serviceFee: row.serviceFee, 
+                                materialCost: row.materialCost, 
+                                creditPoints: row.creditPoints, 
+                                discount: row.discount, 
+                                netTotal: row.netTotal, 
+                                discountDescription: row.discountDescription, 
+                                paymentMethod: row.paymentMethod, 
+                                userMethodId: row.userMethodId, 
+                                paymentRemarks: row.paymentRemarks, 
+                                serviceDate: row.serviceDate, 
+                                status: row.status, 
+                                createAt: row.createAt, 
+                                updateAt: row.updateAt, 
+                                cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
-                                updateAt: row.updateAt,
                                 user : user,
                                 address : address,
-                                staff : staff,
+                                userPaymentMethod: userPaymentMethod,
+                                staff : [],
                                 items: [], 
                                 tasks: [],
                                 check_activities: []
@@ -525,7 +632,7 @@ module.exports = {
                                     qty: row.qty,
                                     price: row.price,
                                     isSubService: row.isSubService,
-                                    bookingDate: row.bookingDate,
+                                    bookingDate: row.createAt,
                                     serviceDate: row.serviceDate,
                                 };
                                 booking.items.push(item);
@@ -540,7 +647,7 @@ module.exports = {
                             if (!task) {
                                 task = {
                                     id: row.taskId,
-                                    bookingId: row.bookingId,
+                                    staffId: row.taskStaffId,
                                     title: row.taskTitle,
                                     description: row.taskDescription,
                                     status: row.taskStatus,
@@ -570,7 +677,27 @@ module.exports = {
                             }
                     
                         }
-                        
+
+                        if(row.staffId != null)
+                        {
+                            let s = booking.staff.find((c) => c.staffId === row.staffId);
+    
+                            if (!s) {
+                                s = {
+                                    staffId: row.staffId,
+                                    name: row.staffName,
+                                    phone: row.staffPhone,
+                                    email: row.staffEmail,
+                                    gender: row.staffGender,
+                                    imageUrl: row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role: row.role,
+                                    serviceDate: row.serviceDate
+                                };
+                                booking.staff.push(s);
+                            }
+                    
+                        }
                     
                 }
                 return callback(null, bookings);
@@ -585,30 +712,34 @@ module.exports = {
             text = "";
         }
         pool.query(`Select
-        b.bookingId,
+        b.bookingId, 
         bookingCode, 
-        instructions,
-        frequency,
-        b.bookingDate,
+        b.userId, 
+        addressId, 
+        instructions, 
+        frequency, 
         hours, 
         professionals, 
         includeMaterial, 
-        professionalId, 
+        voucherCode, 
         subTotal, 
         tax, 
         voucherPrice, 
         serviceFee, 
         materialCost, 
-        discount,
+        b.creditPoints, 
+        discount, 
         netTotal, 
-        voucherCode, 
+        discountDescription, 
         paymentMethod, 
         userMethodId, 
+        paymentRemarks, 
         b.serviceDate, 
-        status, 
-        cancelReason,
-        cancelledAt, 
-        b.updateAt,
+        b.status, 
+        b.createAt, 
+        b.updateAt, 
+        cancelReason, 
+        cancelledAt,
         
         i.id, 
         i.serviceId, 
@@ -621,6 +752,7 @@ module.exports = {
         u.gender,
         u.phone,
         u.email,
+        u.country,
         u.latitude,
         u.longitude,
         u.imageUrl,
@@ -631,6 +763,17 @@ module.exports = {
         a.longitude as addressLongitude,
         a.description as addressDescription,
 
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation,
+        
+        p.id as assignId,
+		professionalId,
+        assignDate,
+        modifiedAt,
+        
         s.staffId,
         s.name as staffName,
         s.phone as staffPhone,
@@ -639,18 +782,30 @@ module.exports = {
         s.imageUrl as staffImageUrl,
         s.fcmToken as staffFcmToken,
         s.role,
-        c.id as checkId,
-        checkedIn,
-        checkedInLocation,
-        checkedOut,
-        checkedOutLocation
+        
+        t.id as taskId, 
+        t.staffId as taskStaffId,
+        title as taskTitle, 
+        t.description as taskDescription, 
+        t.status as taskStatus, 
+        t.createAt as taskCreateAt, 
+        t.completeAt as taskCompleteAt,
+        
+        m.id as paymentMethodId,
+		cardNumber, 
+        expiryDate, 
+        cvv, 
+        m.description as methodDescription
         
         from bookings b 
         left join booking_items i on b.bookingId = i.bookingId
         left join users u on b.userId = u.id
         left join addresses a on b.addressId = a.id
-        left join staff s on b.professionalId = s.staffId
+        left join booking_professionals p on b.bookingId = p.bookingId
+        left join staff s on p.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
+        left join tasks t on b.bookingId = t.bookingId
+        left join user_payment_methods m on m.id = b.userMethodId
          where bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? order by b.serviceDate desc`,
          [`%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
@@ -668,20 +823,8 @@ module.exports = {
                         if (!booking){
                             let user = null;
                             let address = null;
-                            let staff = null;
-                            if(row.staffId)
-                            {
-                                staff = {
-                                    staffId : row.staffId,
-                                    name : row.staffName,
-                                    gender : row.staffGender,
-                                    email : row.staffEmail,
-                                    phone : row.staffPhone,
-                                    imageUrl : row.staffImageUrl,
-                                    fcmToken: row.staffFcmToken,
-                                    role : row.role
-                                };
-                            }
+                            let userPaymentMethod = null;
+                            
                             if(row.addressLatitude)
                             {
                                 address = {
@@ -692,6 +835,7 @@ module.exports = {
                                     description : row.addressDescription,
                                 };
                             }
+
                             if(row.username)
                             {
                                 user = {
@@ -700,6 +844,7 @@ module.exports = {
                                     gender : row.gender,
                                     email : row.email,
                                     phone : row.phone,
+                                    country : row.country,
                                     latitude : row.latitude,
                                     longitude : row.longitude,
                                     imageUrl : row.imageUrl,
@@ -707,39 +852,53 @@ module.exports = {
     
                                 };
                             }
+
+                            if(row.paymentMethodId)
+                            {
+                                userPaymentMethod = {
+                                    id: row.paymentMethodId,
+                                    cardNumber: row.cardNumber,
+                                    expiryDate: row.expiryDate,
+                                    cvv: row.cvv,
+                                    description: row.methodDescription,
+                                };
+                            }
                             booking = {
-                                bookingId: row.bookingId,
-                                professionalId: row.professionalId,
-                                userId: row.userId,
-                                addressId: row.addressId,
-                                bookingCode: row.bookingCode,
-                                instructions: row.instructions,
-                                frequency : row.frequency,
-                                bookingDate: row.bookingDate,
-                                hours: row.hours,
-                                professionals: row.professionals,
-                                includeMaterial: row.includeMaterial,
-                                subTotal: row.subTotal,
-                                tax: row.tax,
-                                voucherPrice: row.voucherPrice,
-                                serviceFee: row.serviceFee,
-                                materialCost: row.materialCost,
-                                discount: row.discount,
-                                netTotal: row.netTotal,
-                                voucherCode: row.voucherCode,
-                                paymentMethod: row.paymentMethod,
-                                userMethodId: row.userMethodId,
-                                serviceDate: row.serviceDate,
-                                status: row.status,
-                                cancelReason: row.cancelReason,
+                                bookingId: row.bookingId, 
+                                bookingCode: row.bookingCode, 
+                                userId: row.userId, 
+                                addressId: row.addressId, 
+                                instructions: row.instructions, 
+                                frequency: row.frequency, 
+                                hours: row.hours, 
+                                professionals: row.professionals, 
+                                includeMaterial: row.includeMaterial, 
+                                voucherCode: row.voucherCode, 
+                                subTotal: row.subTotal, 
+                                tax: row.tax, 
+                                voucherPrice: row.voucherPrice, 
+                                serviceFee: row.serviceFee, 
+                                materialCost: row.materialCost, 
+                                creditPoints: row.creditPoints, 
+                                discount: row.discount, 
+                                netTotal: row.netTotal, 
+                                discountDescription: row.discountDescription, 
+                                paymentMethod: row.paymentMethod, 
+                                userMethodId: row.userMethodId, 
+                                paymentRemarks: row.paymentRemarks, 
+                                serviceDate: row.serviceDate, 
+                                status: row.status, 
+                                createAt: row.createAt, 
+                                updateAt: row.updateAt, 
+                                cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
-                                updateAt: row.updateAt,
                                 user : user,
                                 address : address,
-                                staff : staff,
+                                userPaymentMethod: userPaymentMethod,
+                                staff : [],
                                 items: [], 
                                 tasks: [],
-                                check_activities : []
+                                check_activities: []
                             };
                             bookings.push(booking);
                         }
@@ -756,7 +915,7 @@ module.exports = {
                                     qty: row.qty,
                                     price: row.price,
                                     isSubService: row.isSubService,
-                                    bookingDate: row.bookingDate,
+                                    bookingDate: row.createAt,
                                     serviceDate: row.serviceDate,
                                 };
                                 booking.items.push(item);
@@ -771,7 +930,7 @@ module.exports = {
                             if (!task) {
                                 task = {
                                     id: row.taskId,
-                                    bookingId: row.bookingId,
+                                    staffId: row.taskStaffId,
                                     title: row.taskTitle,
                                     description: row.taskDescription,
                                     status: row.taskStatus,
@@ -798,6 +957,27 @@ module.exports = {
                                     checkedOutLocation: row.checkedOutLocation,
                                 };
                                 booking.check_activities.push(activity);
+                            }
+                    
+                        }
+
+                        if(row.staffId != null)
+                        {
+                            let s = booking.staff.find((c) => c.staffId === row.staffId);
+    
+                            if (!s) {
+                                s = {
+                                    staffId: row.staffId,
+                                    name: row.staffName,
+                                    phone: row.staffPhone,
+                                    email: row.staffEmail,
+                                    gender: row.staffGender,
+                                    imageUrl: row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role: row.role,
+                                    serviceDate: row.serviceDate
+                                };
+                                booking.staff.push(s);
                             }
                     
                         }
@@ -811,32 +991,35 @@ module.exports = {
     getDateWiseBookings : (data, callback) => {
         var startDate = data.startDate;
         var endDate = data.endDate;
-        console.log(startDate, endDate);
         pool.query(`Select
-        b.bookingId,
+        b.bookingId, 
         bookingCode, 
-        instructions,
-        frequency,
-        b.bookingDate,
+        b.userId, 
+        addressId, 
+        instructions, 
+        frequency, 
         hours, 
         professionals, 
         includeMaterial, 
-        professionalId, 
+        voucherCode, 
         subTotal, 
         tax, 
         voucherPrice, 
         serviceFee, 
         materialCost, 
-        discount,
+        b.creditPoints, 
+        discount, 
         netTotal, 
-        voucherCode, 
+        discountDescription, 
         paymentMethod, 
         userMethodId, 
+        paymentRemarks, 
         b.serviceDate, 
-        status, 
-        cancelReason,
-        cancelledAt, 
-        b.updateAt,
+        b.status, 
+        b.createAt, 
+        b.updateAt, 
+        cancelReason, 
+        cancelledAt,
         
         i.id, 
         i.serviceId, 
@@ -849,6 +1032,7 @@ module.exports = {
         u.gender,
         u.phone,
         u.email,
+        u.country,
         u.latitude,
         u.longitude,
         u.imageUrl,
@@ -859,6 +1043,17 @@ module.exports = {
         a.longitude as addressLongitude,
         a.description as addressDescription,
 
+        c.id as checkId,
+        checkedIn,
+        checkedInLocation,
+        checkedOut,
+        checkedOutLocation,
+        
+        p.id as assignId,
+		professionalId,
+        assignDate,
+        modifiedAt,
+        
         s.staffId,
         s.name as staffName,
         s.phone as staffPhone,
@@ -867,23 +1062,36 @@ module.exports = {
         s.imageUrl as staffImageUrl,
         s.fcmToken as staffFcmToken,
         s.role,
-        c.id as checkId,
-        checkedIn,
-        checkedInLocation,
-        checkedOut,
-        checkedOutLocation
+        
+        t.id as taskId, 
+        t.staffId as taskStaffId,
+        title as taskTitle, 
+        t.description as taskDescription, 
+        t.status as taskStatus, 
+        t.createAt as taskCreateAt, 
+        t.completeAt as taskCompleteAt,
+        
+        m.id as paymentMethodId,
+		cardNumber, 
+        expiryDate, 
+        cvv, 
+        m.description as methodDescription
         
         from bookings b 
         left join booking_items i on b.bookingId = i.bookingId
         left join users u on b.userId = u.id
         left join addresses a on b.addressId = a.id
-        left join staff s on b.professionalId = s.staffId
+        left join booking_professionals p on b.bookingId = p.bookingId
+        left join staff s on p.professionalId = s.staffId
         left join staff_check_activities c on b.bookingId = c.bookingId
-         where status != 'Cancelled' and b.serviceDate between ? and ? order by b.serviceDate desc`,
+        left join tasks t on b.bookingId = t.bookingId
+        left join user_payment_methods m on m.id = b.userMethodId
+         where b.status != 'Cancelled' and b.serviceDate between ? and ? order by b.serviceDate desc`,
          [`${startDate}`, `${endDate}`], 
          (error, results, fields)=> {
             if(error)
                 {
+                    console.log("Error in date-wise booking");
                     return callback(error);
                 }
                 else
@@ -896,20 +1104,8 @@ module.exports = {
                         if (!booking){
                             let user = null;
                             let address = null;
-                            let staff = null;
-                            if(row.staffId)
-                            {
-                                staff = {
-                                    staffId : row.staffId,
-                                    name : row.staffName,
-                                    gender : row.staffGender,
-                                    email : row.staffEmail,
-                                    phone : row.staffPhone,
-                                    imageUrl : row.staffImageUrl,
-                                    fcmToken: row.staffFcmToken,
-                                    role : row.role
-                                };
-                            }
+                            let userPaymentMethod = null;
+                            
                             if(row.addressLatitude)
                             {
                                 address = {
@@ -920,6 +1116,7 @@ module.exports = {
                                     description : row.addressDescription,
                                 };
                             }
+
                             if(row.username)
                             {
                                 user = {
@@ -928,6 +1125,7 @@ module.exports = {
                                     gender : row.gender,
                                     email : row.email,
                                     phone : row.phone,
+                                    country : row.country,
                                     latitude : row.latitude,
                                     longitude : row.longitude,
                                     imageUrl : row.imageUrl,
@@ -935,39 +1133,53 @@ module.exports = {
     
                                 };
                             }
+
+                            if(row.paymentMethodId)
+                            {
+                                userPaymentMethod = {
+                                    id: row.paymentMethodId,
+                                    cardNumber: row.cardNumber,
+                                    expiryDate: row.expiryDate,
+                                    cvv: row.cvv,
+                                    description: row.methodDescription,
+                                };
+                            }
                             booking = {
-                                bookingId: row.bookingId,
-                                professionalId: row.professionalId,
-                                userId: row.userId,
-                                addressId: row.addressId,
-                                bookingCode: row.bookingCode,
-                                instructions: row.instructions,
-                                frequency : row.frequency,
-                                bookingDate: row.bookingDate,
-                                hours: row.hours,
-                                professionals: row.professionals,
-                                includeMaterial: row.includeMaterial,
-                                subTotal: row.subTotal,
-                                tax: row.tax,
-                                voucherPrice: row.voucherPrice,
-                                serviceFee: row.serviceFee,
-                                materialCost: row.materialCost,
-                                discount: row.discount,
-                                netTotal: row.netTotal,
-                                voucherCode: row.voucherCode,
-                                paymentMethod: row.paymentMethod,
-                                userMethodId: row.userMethodId,
-                                serviceDate: row.serviceDate,
-                                status: row.status,
-                                cancelReason: row.cancelReason,
+                                bookingId: row.bookingId, 
+                                bookingCode: row.bookingCode, 
+                                userId: row.userId, 
+                                addressId: row.addressId, 
+                                instructions: row.instructions, 
+                                frequency: row.frequency, 
+                                hours: row.hours, 
+                                professionals: row.professionals, 
+                                includeMaterial: row.includeMaterial, 
+                                voucherCode: row.voucherCode, 
+                                subTotal: row.subTotal, 
+                                tax: row.tax, 
+                                voucherPrice: row.voucherPrice, 
+                                serviceFee: row.serviceFee, 
+                                materialCost: row.materialCost, 
+                                creditPoints: row.creditPoints, 
+                                discount: row.discount, 
+                                netTotal: row.netTotal, 
+                                discountDescription: row.discountDescription, 
+                                paymentMethod: row.paymentMethod, 
+                                userMethodId: row.userMethodId, 
+                                paymentRemarks: row.paymentRemarks, 
+                                serviceDate: row.serviceDate, 
+                                status: row.status, 
+                                createAt: row.createAt, 
+                                updateAt: row.updateAt, 
+                                cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
-                                updateAt: row.updateAt,
                                 user : user,
                                 address : address,
-                                staff : staff,
+                                userPaymentMethod: userPaymentMethod,
+                                staff : [],
                                 items: [], 
                                 tasks: [],
-                                check_activities : []
+                                check_activities: []
                             };
                             bookings.push(booking);
                         }
@@ -984,7 +1196,7 @@ module.exports = {
                                     qty: row.qty,
                                     price: row.price,
                                     isSubService: row.isSubService,
-                                    bookingDate: row.bookingDate,
+                                    bookingDate: row.createAt,
                                     serviceDate: row.serviceDate,
                                 };
                                 booking.items.push(item);
@@ -999,7 +1211,7 @@ module.exports = {
                             if (!task) {
                                 task = {
                                     id: row.taskId,
-                                    bookingId: row.bookingId,
+                                    staffId: row.taskStaffId,
                                     title: row.taskTitle,
                                     description: row.taskDescription,
                                     status: row.taskStatus,
@@ -1026,6 +1238,27 @@ module.exports = {
                                     checkedOutLocation: row.checkedOutLocation,
                                 };
                                 booking.check_activities.push(activity);
+                            }
+                    
+                        }
+
+                        if(row.staffId != null)
+                        {
+                            let s = booking.staff.find((c) => c.staffId === row.staffId);
+    
+                            if (!s) {
+                                s = {
+                                    staffId: row.staffId,
+                                    name: row.staffName,
+                                    phone: row.staffPhone,
+                                    email: row.staffEmail,
+                                    gender: row.staffGender,
+                                    imageUrl: row.staffImageUrl,
+                                    fcmToken: row.staffFcmToken,
+                                    role: row.role,
+                                    serviceDate: row.serviceDate
+                                };
+                                booking.staff.push(s);
                             }
                     
                         }
