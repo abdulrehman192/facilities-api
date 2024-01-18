@@ -6,8 +6,8 @@ module.exports = {
     create :(data, callback) => {
             const now = new Date();
             data.createAt = now;
-            pool.query(`insert into addresses (userId, latitude, longitude, description, isDefault, createAt) values (?,?,?,?,?,?)`,
-             [data.userId,data.latitude, data.longitude, data.description, data.isDefault, data.createAt], 
+            pool.query(`insert into addresses (userId, latitude, longitude, description, phone, fullName, label, isDefault, createAt) values (?,?,?,?,?,?,?,?,?)`,
+             [data.userId,data.latitude, data.longitude, data.description, data.phone, data.fullName, data.label, data.isDefault, data.createAt], 
              (error, results, fields)=> {
                 if(error)
                     {
@@ -35,8 +35,8 @@ module.exports = {
                 );
             }
         }
-        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, isDefault = ?, updateAt = ? where id = ? and userId = ? `,
-         [data.latitude, data.longitude, data.description, data.isDefault, data.updateAt, data.id, data.userId], 
+        pool.query(`update addresses set latitude = ?, longitude = ?, description = ?, phone = ?, fullName = ?, label = ?, isDefault = ?, updateAt = ? where id = ? and userId = ? `,
+         [data.latitude, data.longitude, data.description, data.phone, data.fullName, data.label, data.isDefault, data.updateAt, data.id, data.userId], 
          (error, results, fields)=> {
             if(error)
                 {
