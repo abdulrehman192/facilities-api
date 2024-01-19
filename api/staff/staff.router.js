@@ -44,7 +44,7 @@ const uploadIfImageUrl = (req, res, next) => {
 router.post("/create-staff-account", uploadIfImageUrl, createStaffAccount);
 router.patch("/update-staff-account", checkToken, uploadIfImageUrl, updateStaffAccount);
 router.delete("/delete-staff-account", checkToken, deleteStaffAccount);
-router.post("/get-all-staff-accounts", checkToken, getAllStaffAccounts);
+router.post("/get-all-staff-accounts", getAllStaffAccounts);
 router.post("/get-one-staff-by-id", checkToken, getOneStaffAccountById);
 router.post("/staffLogin", staffLogin);
 router.post("/update-fcm", checkToken, updateStaffFcm);
