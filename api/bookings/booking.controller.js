@@ -1,5 +1,5 @@
 const { response } = require("express");
-const  {create, update, deleteBooking, getAllUserBookings, getDateWiseBookings, getAllProfessionalBookings,cancelBooking, updateBookingStatus, getAllBookings, updateBookingProfessional, deleteBookingProfessional} = require("./booking.service");
+const  {create, update, deleteBooking, getAllUserBookings, getDateWiseBookings, updateBookingPaymentStatus, getAllProfessionalBookings,cancelBooking, updateBookingStatus, getAllBookings, updateBookingProfessional, deleteBookingProfessional} = require("./booking.service");
 var errorMessage = "Error while connecting to database server";
 module.exports = {
     createBooking : (request, response) =>{
@@ -101,6 +101,38 @@ module.exports = {
             return response.status(200).json({
                 success : 1,
                 message: "booking status successfully updated",
+            });
+       });
+    },
+
+    updateBookingPaymentStatus : (request, response) =>{
+        const body = request.body;
+        if(!body.bookingId)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "bookingId is required to update booking"
+            });
+        }
+        if(!body.paymentReceived)
+        {
+            return response.status(400).json({
+                success : 0,
+                message: "paymentReceived is required to update booking"
+            });
+        }
+       updateBookingPaymentStatus(body, (error, results) =>{
+        if(error)
+            {
+                return response.status(500).json({
+                    success : 0,
+                    message : errorMessage
+                });
+            }
+
+            return response.status(200).json({
+                success : 1,
+                message: "booking payment status successfully updated",
             });
        });
     },

@@ -173,6 +173,7 @@ module.exports = {
         b.updateAt, 
         cancelReason, 
         cancelledAt,
+        paymentReceived,
         
         i.id, 
         i.serviceId, 
@@ -326,6 +327,7 @@ module.exports = {
                                 updateAt: row.updateAt, 
                                 cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
+                                paymentReceived: row.paymentReceived,
                                 user : user,
                                 address : address,
                                 userPaymentMethod: userPaymentMethod,
@@ -458,6 +460,7 @@ module.exports = {
         b.updateAt, 
         cancelReason, 
         cancelledAt,
+        paymentReceived,
         
         i.id, 
         i.serviceId, 
@@ -614,6 +617,7 @@ module.exports = {
                                 user : user,
                                 address : address,
                                 userPaymentMethod: userPaymentMethod,
+                                paymentReceived : row.paymentReceived,
                                 staff : [],
                                 items: [], 
                                 tasks: [],
@@ -742,6 +746,7 @@ module.exports = {
         b.updateAt, 
         cancelReason, 
         cancelledAt,
+        paymentReceived,
         
         i.id, 
         i.serviceId, 
@@ -894,6 +899,7 @@ module.exports = {
                                 updateAt: row.updateAt, 
                                 cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
+                                paymentReceived: row.paymentReceived,
                                 user : user,
                                 address : address,
                                 userPaymentMethod: userPaymentMethod,
@@ -1022,6 +1028,7 @@ module.exports = {
         b.updateAt, 
         cancelReason, 
         cancelledAt,
+        paymentReceived,
         
         i.id, 
         i.serviceId, 
@@ -1175,6 +1182,7 @@ module.exports = {
                                 updateAt: row.updateAt, 
                                 cancelReason: row.cancelReason, 
                                 cancelledAt: row.cancelledAt,
+                                paymentReceived: row.paymentReceived,
                                 user : user,
                                 address : address,
                                 userPaymentMethod: userPaymentMethod,
@@ -1288,6 +1296,20 @@ module.exports = {
         data.updateAt = now;
         pool.query(`update bookings set status = ?, updateAt = ? where bookingId = ?`,
         [data.status, data.updateAt, data.bookingId], 
+        (error, results, fields)=> {
+           if(error)
+               {
+                   return callback(error);
+               }
+           return callback(null, results);
+        });
+    },
+
+    updateBookingPaymentStatus: (data, callback) =>{
+        const now = new Date();
+        data.updateAt = now;
+        pool.query(`update bookings set paymentReceived = ?, updateAt = ? where bookingId = ?`,
+        [data.paymentReceived, data.updateAt, data.bookingId], 
         (error, results, fields)=> {
            if(error)
                {
