@@ -364,7 +364,7 @@ module.exports = {
                             if (!task) {
                                 task = {
                                     id: row.taskId,
-                                    staffId: row.taskStaffId,
+                                    staffId: row.staffId,
                                     title: row.taskTitle,
                                     description: row.taskDescription,
                                     status: row.taskStatus,
@@ -428,6 +428,7 @@ module.exports = {
         {
             text = "";
         }
+        console.log(data.professionalId);
         pool.query(`Select
         b.bookingId, 
         bookingCode, 
@@ -523,11 +524,12 @@ module.exports = {
         left join staff_check_activities c on b.bookingId = c.bookingId
         left join tasks t on b.bookingId = t.bookingId
         left join user_payment_methods m on m.id = b.userMethodId
-         where b.professionalId = ? and (bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? ) order by b.serviceDate desc`,
+         where s.staffId = ? and (bookingCode like ? or frequency like ? or s.name like ? or s.role like ? or voucherCode like ? or paymentMethod like ? or b.status like ? or u.name like ? or u.phone like ? or u.email like ? or s.phone like ? ) order by b.serviceDate desc`,
          [data.professionalId, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`, `%${text}%`], 
          (error, results, fields)=> {
             if(error)
                 {
+                    console.log("Here is error");
                     return callback(error);
                 }
                 else
