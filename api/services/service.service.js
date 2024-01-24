@@ -49,6 +49,7 @@ module.exports = {
                         }
                         else
                         {
+                          sendNotificationToUsers(serviceTitle);
                           return callback(null, "service successfully create");
                         }
                     }
@@ -259,5 +260,63 @@ module.exports = {
             }
         );
     },
+
+    sendNotificationToUsers: (serviceName) => {
+        var body = {
+          "title" : "A new service added to the list",
+          "body" : `We are offering ${serviceName} service. Book the service according to your need.`
+        };
+        pool.query(`select * from users`,[],
+        (error, results, fields)=>{
+          if(error)
+            {
+                console.log(error);
+            }
+            if(results.length > 0)
+            {
+                var err  = null;
+                results.forEach(element => {
+                  var deviceToken = element.fcmToken;
+                  if(deviceToken)
+                  {
+                    var doc = {
+                      "to" : deviceToken,
+                      "priority" : "high",
+                      "notification" : body,
+                      "data": {}
+                    };
+      
+                    var headers = {
+                      "Content-Type" : "application/json; charset=UTF-8",
+                      "Authorization" : "key=AAAAkE_QHH4:APA91bHdI-zTEfOlLxsK24zJGh8jWzx2jz2MB2QcaWTqXYRRxrd8PjpM0YfBSOcSbiOT8Rafagym9KIdSCXviTVzALXVFj0OVqHdqX3NAApYfVv5qOPt3azWqQMsf0NrBwEpuFHf0ABd",
+                    };
+      
+                    var url = "https://fcm.googleapis.com/fcm/send";
+                    axios.post(url, doc, {headers})
+                    .then(response => {
+                      // Handle the response data
+                    //   console.log('Response:', response.data);
+                    //   return callback(null, response.data);
+                    })
+                    .catch(error => {
+                      err = error;
+                    });
+                  }
+                });
+
+                if(err){
+                    console.log(err);
+                }
+                else
+                {
+                    console.log(null, "notification sent");
+                }
+            }
+            else{
+                console.log(null, "No user found");
+            }
+        }
+        );
+       },
 
 }
