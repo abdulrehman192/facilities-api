@@ -181,7 +181,7 @@ module.exports = {
         );
     },
     getStaffByPhone : (data, callback) =>{
-        pool.query("Select * from staff where email = ? and password ", [data.email, data.password], (error, result, fields)=> {
+        pool.query("Select * from staff where email = ? and password = ?", [data.email, data.password], (error, result, fields)=> {
             if(error)
             {
                 return callback(errorMessage);
