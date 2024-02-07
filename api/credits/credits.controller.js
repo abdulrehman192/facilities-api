@@ -22,7 +22,7 @@ module.exports = {
 
             return response.status(200).json({
                 success : 1,
-                message: "credits successfully created",
+                message: results,
             });
        });
     },

@@ -44,6 +44,7 @@ app.get("/api", (request, response)=> {
 //users end points
 const userRouter = require("./api/users/user.router");
 const userAddressRouter = require("./api/addresses/address.router");
+const userCreditsRouter = require("./api/credits/credits.router");
 const userPaymentMethodRouter = require("./api/user-payment-methods/method.router");
 const serviceCategoriesRouter = require("./api/service-categories/category.router");
 const servicesRouter = require("./api/services/service.router");
@@ -60,6 +61,7 @@ const checkRouter = require("./api/staff-check-activities/activity.router");
 
 app.use("/api/auth", userRouter);
 app.use("/api/user", userAddressRouter);
+app.use("/api/user", userCreditsRouter);
 app.use("/api/user", userPaymentMethodRouter);
 app.use("/api", serviceCategoriesRouter);
 app.use("/api", servicesRouter);
