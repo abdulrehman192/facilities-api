@@ -8,31 +8,66 @@ module.exports = {
             const now = new Date();
             data.createAt = now;
             var x = {};
-            pool.query(`insert into user_credits (userId, points, description, dateTime, expiryDate) values (?,?,?,?,?)`,
-             [data.userId, data.points, data.description, data.dateTime, data.expiryDate], 
-             (error, results, fields)=> {
+            var err = null;
+            var sql = `select * from user_credits where userId = ? and dateTime = ?`;
+            var fields  = [data.userId, data.dateTime];
+            pool.query(sql, fields,(error, result, fields)=> {      
                 if(error)
-                    {
-                        return callback(error);
-                    }
+                {
+                    err = error;
+                    return callback(err, null);
+                }
                 else{
-                    var fields  = [data.userId, data.dateTime, data.expiryDate];
-                    console.log(fields);
-                    pool.query(`select * from user_credits where userId = ? and dateTime = ?`, fields,(error, result, fields)=> {
-                        console.log(result);
-                        if(error)
-                        {
-                            return callback(error);
-                        }
-                        else{
-                            
-                            x = result[0];
-                            return callback(null, x);
-                        }
-                    });
+                    var length = result.length;
+                    if(length > 0){
+                        x = result[0];
+                        pool.query(`update user_credits set points = points + ? where userId = ? and dateTime = ? `,
+                        [data.points, data.userId, data.dateTime], 
+                        (error, results, fields)=> {
+                            if(error)
+                            {
+                                err = error;
+                                return callback(err, null);
+                            } 
+                            else{
+                                x.points = parseInt(x.points) + parseInt(data.points);
+                                return callback(err, x);
+                            }
+                           
+                        });
+                    }
+                    else{
+                        pool.query(`insert into user_credits (userId, points, description, dateTime, expiryDate) values (?,?,?,?,?)`,
+                        [data.userId, data.points, data.description, data.dateTime, data.expiryDate], 
+                        (error, results, fields)=> {
+                           if(error)
+                            {
+                                err = error;
+                                return callback(err, null);
+                            }
+                           else{
+                            pool.query(sql, fields,(error, result, fields)=> {
+                                if(error)
+                                {
+                                    return callback(error, null);
+                                }
+                                else{
+                                    length = result.length;
+                                    if(result){
+                                        x = result[0];
+                                        return callback(null, x);
+                                    }
+                                    else{
+                                        return callback("no record found", {});
+                                    }
+                                }
+                            });
+                           }
+                        });
+                    }
                     
                 }
-             });
+            }); 
     },
     update : (data, callback) => {
         const now = new Date();
