@@ -10,8 +10,8 @@ module.exports = {
             console.log(data);
             var x = {};
             var err = null;
-            var sql = `select * from user_credits where userId = ? and dateTime = ? and points = ?`;
-            var fields  = [data.userId, data.dateTime, data.points];
+            var sql = `select * from user_credits where userId = ? and dateTime = ? `;
+            var fields  = [data.userId, data.dateTime,];
             pool.query(sql, fields,(error, result, fields)=> {      
                 if(error)
                 {
