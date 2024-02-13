@@ -7,10 +7,11 @@ module.exports = {
     create :(data, callback) => {
             const now = new Date();
             data.createAt = now;
+            console.log(data);
             var x = {};
             var err = null;
-            var sql = `select * from user_credits where userId = ? and dateTime = ?`;
-            var fields  = [data.userId, data.dateTime];
+            var sql = `select * from user_credits where userId = ? and dateTime = ? and points = ?`;
+            var fields  = [data.userId, data.dateTime, data.points];
             pool.query(sql, fields,(error, result, fields)=> {      
                 if(error)
                 {
@@ -37,7 +38,7 @@ module.exports = {
                         });
                     }
                     else{
-                        pool.query(`insert into user_credits (userId, points, description, dateTime, expiryDate) values (?,?,?,?,?)`,
+                        pool.query(`insert IGNORE into user_credits (userId, points, description, dateTime, expiryDate) values (?,?,?,?,?)`,
                         [data.userId, data.points, data.description, data.dateTime, data.expiryDate], 
                         (error, results, fields)=> {
                            if(error)
