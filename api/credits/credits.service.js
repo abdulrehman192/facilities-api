@@ -22,7 +22,7 @@ module.exports = {
                     var length = result.length;
                     if(length > 0){
                         x = result[0];
-                        pool.query(`update user_credits set points = points + ? where userId = ? and dateTime = ? `,
+                        pool.query(`update user_credits set points = ? where userId = ? and dateTime = ? `,
                         [data.points, data.userId, data.dateTime], 
                         (error, results, fields)=> {
                             if(error)
