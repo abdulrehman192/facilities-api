@@ -69,15 +69,7 @@ module.exports = {
         const baseUrl = process.env.BASE_URL;
         if(req.files.length > 0)
         {   
-            var files = req.files;
-            files.forEach(function(obj){
-            
-                if(obj.fieldname === 'serviceCoverImageUrl')
-                {
-                    coverImageUrl = `${baseUrl}/files/${obj.originalname}`;
-                }
-                
-            });
+            coverImageUrl = req.imageUrl;
             var missingElement = checkMissingElement(req.files);
             var query = "";
             var fields = [];

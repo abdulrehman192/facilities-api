@@ -26,11 +26,9 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.createAt = now;
-        const baseUrl = process.env.BASE_URL; 
-        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
-        if(fileUrls.length > 0)
+        if(req.files.length > 0)
         {
-            imageUrl = fileUrls[0];
+            imageUrl = req.imageUrl;
         }
         pool.query(`select * from staff where email = ?`, [data.email], (error, result, fields) => {
             if(error)
@@ -74,11 +72,9 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.updateAt = now;
-        const baseUrl = process.env.BASE_URL;
-        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
-        if(fileUrls.length > 0)
+        if(req.files.length > 0)
         {
-            imageUrl = fileUrls[0];
+            imageUrl = req.imageUrl;
         }
         pool.query(`select * from staff where staffId = ?`, [data.staffId], (error, results, fields) => {
             if(error)

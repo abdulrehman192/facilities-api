@@ -6,18 +6,13 @@ var errorMessage = "Error while connecting to database server";
 
 module.exports = {
     create : (req, callback) => {
-        // Initialize imageUrl to null
-
-        let imageUrl = null;
         var data = req.body;
         console.log(data);
         const now = new Date();
         data.createAt = now;
-        const baseUrl =  process.env.BASE_URL; 
-        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
-        if(fileUrls.length > 0)
+        if(req.files.length > 0)
         {
-            imageUrl = fileUrls[0];
+          data.categoryImageUrl = req.imageUrl;
         }
         pool.query(`select * from service_categories where categoryTitle = ?`, [data.categoryTitle], (error, result, fields) => {
             if(error)
@@ -31,7 +26,7 @@ module.exports = {
                 pool.query(`Insert into service_categories (categoryTitle, categoryImageUrl, categoryDescription, categorySr) values (?,?,?,?)`, 
                 [
                     data.categoryTitle, 
-                    imageUrl, 
+                    data.categoryImageUrl, 
                     data.categoryDescription, 
                     data.categorySr
                 ],
@@ -60,11 +55,9 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.updateAt = now;
-        const baseUrl = process.env.BASE_URL; 
-        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
-        if(fileUrls.length > 0)
+        if(req.files.length > 0)
         {
-            imageUrl = fileUrls[0];
+            imageUrl = req.imageUrl;
         }
         
         if(imageUrl)
