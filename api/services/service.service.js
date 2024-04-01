@@ -188,7 +188,7 @@ module.exports = {
             (error, result, fields) => {
             if(error)
             {
-                return callback(errorMessage);
+                return callback(error);
             }
 
             var rows = result;
