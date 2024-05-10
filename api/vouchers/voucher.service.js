@@ -13,7 +13,9 @@ module.exports = {
         data.createAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from vouchers where voucherCode = ?`, [data.voucherCode], (error, result, fields) => {
             if(error)
@@ -27,7 +29,7 @@ module.exports = {
                 [
                     data.voucherCode, 
                     data.amount, 
-                    imageUrl, 
+                    data.imageUrl, 
                     data.serviceId, 
                     data.expiryDate,
                     data.createAt,
@@ -59,16 +61,18 @@ module.exports = {
         data.updateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         
-        if(imageUrl)
+        if(data.imageUrl)
         {
             pool.query(`Update vouchers set voucherCode = ? , amount = ? , imageUrl = ?, serviceId = ?, expiryDate = ?, isSlideImage = ? where voucherId = ?`, 
             [
                 data.voucherCode, 
                 data.amount, 
-                imageUrl, 
+                data.imageUrl, 
                 data.serviceId, 
                 data.expiryDate,
                 data.isSlideImage,

@@ -12,7 +12,9 @@ module.exports = {
         data.createAt = now;
         if(req.files.length > 0)
         {
-          data.categoryImageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from service_categories where categoryTitle = ?`, [data.categoryTitle], (error, result, fields) => {
             if(error)
@@ -57,15 +59,17 @@ module.exports = {
         data.updateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         
-        if(imageUrl)
+        if(data.categoryImageUrl)
         {
             pool.query(`Update service_categories set categoryTitle = ? , categoryImageUrl = ? , categoryDescription = ?, categorySr = ? where categoryId = ?`, 
             [
                 data.categoryTitle, 
-                imageUrl, 
+                data.categoryImageUrl, 
                 data.categoryDescription, 
                 data.categorySr,
                 data.categoryId

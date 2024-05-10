@@ -28,7 +28,9 @@ module.exports = {
         data.createAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from staff where email = ?`, [data.email], (error, result, fields) => {
             if(error)
@@ -45,7 +47,7 @@ module.exports = {
                     data.password,
                     data.gender, 
                     data.role, 
-                    imageUrl, 
+                    data.imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.createAt, 
@@ -74,7 +76,9 @@ module.exports = {
         data.updateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from staff where staffId = ?`, [data.staffId], (error, results, fields) => {
             if(error)
@@ -82,7 +86,7 @@ module.exports = {
                 return callback(errorMessage);
             }
             if(results.length <= 1){
-                if(imageUrl)
+                if(data.imageUrl)
                 {
                     pool.query(`Update staff set phone = ?, email = ?, gender = ? , role = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where staffId = ?`, 
                 [
@@ -90,7 +94,7 @@ module.exports = {
                     data.email, 
                     data.gender, 
                     data.role, 
-                    imageUrl, 
+                    data.imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.updateAt, 

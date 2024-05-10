@@ -13,7 +13,9 @@ module.exports = {
         data.createAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from service_sub_categories where subCategoryTitle = ?`, [data.subCategoryTitle], (error, result, fields) => {
             if(error)
@@ -26,7 +28,7 @@ module.exports = {
                 pool.query(`Insert into service_sub_categories (subCategoryTitle, subCategoryUrl, subCategoryDescription, subCategoryServiceId) values (?,?,?,?)`, 
                 [
                     data.subCategoryTitle, 
-                    imageUrl, 
+                    data.subCategoryUrl, 
                     data.subCategoryDescription, 
                     data.subCategoryServiceId,
                 ],
@@ -56,15 +58,17 @@ module.exports = {
         data.updateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         
-        if(imageUrl)
+        if(data.subCategoryUrl)
         {
             pool.query(`Update service_sub_categories set subCategoryTitle = ? , subCategoryUrl = ? , subCategoryDescription = ?, subCategoryServiceId = ? where subCategoryId = ?`, 
             [
                 data.subCategoryTitle, 
-                imageUrl, 
+                data.subCategoryUrl, 
                 data.subCategoryDescription, 
                 data.subCategoryServiceId,
                 data.subCategoryId

@@ -27,12 +27,12 @@ module.exports = {
         var data = req.body;
         const now = new Date();
         data.serviceCreateAt = now;
-        const baseUrl = process.env.BASE_URL;
-        const fileUrls = req.files.map(file => `${baseUrl}/files/${file.originalname}`);
-        if(fileUrls.length > 0)
-        {
-            coverImageUrl = fileUrls[0];
-        }
+        if(req.files.length > 0)
+            {
+              req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
+            }
         pool.query(`select * from one_off_services where serviceTitle = ?`, [data.serviceTitle], (error, result, fields) => {
             if(error)
             {
@@ -40,7 +40,7 @@ module.exports = {
             }
             if(result.length <= 0)
             {
-               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  coverImageUrl, data.price, data.duration,data.maxQuantity, data.serviceCreateAt];
+               var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription,  data.serviceCoverImageUrl, data.price, data.duration,data.maxQuantity, data.serviceCreateAt];
                 pool.query(`insert into one_off_services (serviceCategoryId, serviceTitle, serviceSubtitle, serviceDescription, serviceCoverImageUrl, price, duration, maxQuantity, serviceCreateAt) values(?,?,?,?,?,?,?,?,?)`, fields,
                     (error, results, fields) =>{
                         if(error)
@@ -69,19 +69,22 @@ module.exports = {
         const baseUrl = process.env.BASE_URL;
         if(req.files.length > 0)
         {   
-            coverImageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
             var missingElement = checkMissingElement(req.files);
             var query = "";
             var fields = [];
             if(missingElement === "serviceCoverImageUrl")
             {
+            
                 query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, price = ?, duration = ?, maxQuantity = ?, serviceUpdateAt = ? where serviceId = ?`;
                 var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
             }
             else
             {
                 query = `Update one_off_services set serviceCategoryId = ?, serviceTitle = ?, serviceSubtitle = ?, serviceDescription = ?, serviceCoverImageUrl = ? ,price = ?, duration = ?, maxQuantity = ?, serviceUpdateAt = ? where serviceId = ?`;
-                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, coverImageUrl, data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
+                var fields = [data.serviceCategoryId, data.serviceTitle, data.serviceSubtitle, data.serviceDescription, data.serviceCoverImageUrl, data.price, data.duration, data.maxQuantity, data.serviceUpdateAt, data.serviceId];
             }
             
             pool.query(query, fields,

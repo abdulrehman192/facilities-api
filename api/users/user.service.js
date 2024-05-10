@@ -13,7 +13,9 @@ module.exports = {
         data.createAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from users where phone = ?`, [data.phone], (error, result, fields) => {
             if(error)
@@ -31,7 +33,7 @@ module.exports = {
                     data.country, 
                     data.latitude, 
                     data.longitude, 
-                    imageUrl, 
+                    data.imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.createAt, 
@@ -70,7 +72,9 @@ module.exports = {
         data.updateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from users where id = ?`, [data.id], (error, results, fields) => {
             if(error)
@@ -78,7 +82,7 @@ module.exports = {
                 return callback(errorMessage);
             }
             if(results.length <= 1){
-                if(imageUrl)
+                if(data.imageUrl)
                 {
                     pool.query(`Update users set phone = ?, email = ?, gender = ? , country = ?, latitude = ?, longitude = ?, imageUrl = ?, name = ?, fcmToken = ?,  updateAt = ? where id = ?`, 
                 [
@@ -88,7 +92,7 @@ module.exports = {
                     data.country, 
                     data.latitude, 
                     data.longitude, 
-                    imageUrl, 
+                    data.imageUrl, 
                     data.name, 
                     data.fcmToken, 
                     data.updateAt, 

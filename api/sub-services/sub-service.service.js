@@ -13,7 +13,9 @@ module.exports = {
         data.subServiceCreateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         pool.query(`select * from sub_services where subServiceTitle = ?`, [data.subServiceTitle], (error, result, fields) => {
             if(error)
@@ -28,7 +30,7 @@ module.exports = {
                     data.subServiceTitle, 
                     data.subServiceSubtitle, 
                     data.subServiceDescription, 
-                    imageUrl, 
+                    data.subServiceImageUrl, 
                     data.subServiceDuration, 
                     data.subServicePrice, 
                     data.maxQuantity,
@@ -62,14 +64,16 @@ module.exports = {
         data.subServiceUpdateAt = now;
         if(req.files.length > 0)
         {
-            imageUrl = req.imageUrl;
+            req.files.forEach(file => {
+                data[file.fieldname] = req[file.fieldname];
+              });
         }
         
-        if(imageUrl)
+        if(data.subServiceImageUrl)
         {
             pool.query(`Update sub_services set subServiceImageUrl = ? , subServiceSubCategoryId = ?, subServiceTitle = ?, subServiceSubtitle = ? , subServiceDescription = ?, subServiceDuration = ?, subServicePrice = ?, maxQuantity = ?, subServiceUpdateAt = ? where subServiceId = ?`, 
         [
-            imageUrl,
+            data.subServiceImageUrl,
             data.subServiceSubCategoryId, 
             data.subServiceTitle, 
             data.subServiceSubtitle, 
