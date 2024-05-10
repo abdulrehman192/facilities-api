@@ -1,13 +1,13 @@
 {
-  "name": "node-apis",
+  "name": "one-acilities-app-apis",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Abdul Rehman mr.abdulrehman.ar@gmail.com",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
@@ -21,8 +21,5 @@
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "nodemailer": "^6.9.13"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
   }
 }
