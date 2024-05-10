@@ -1,45 +1,27 @@
-const ftp = require('ftp');
+const {uploadFileToLocal} = require('./file-uploader-local');
+const FTPUploader = require('../api/file-uploader-ftp');
+// const SFTPUploader = require('../api/file-uploader-ssh');
 
-// Fixed FTP server configuration
-const ftpConfig = {
-  host: 'ftp.the1bm.com',
-  port: 21,
-  user: 'u725151912.facilities',
-  password: 'Facilities92$!'
+const ftpUploader = new FTPUploader();
+// const sftpUploader = new SFTPUploader();
+
+const UploadMode = {
+  LOCAL: 'local',
+  FTP: 'ftp',
+  // SFTP: 'sftp'
 };
 
+let mode = UploadMode.LOCAL;
 
-class FTPUploader {
-  constructor() {
-    this.config = ftpConfig;
-  }
+const uploadFile = (req, res, next) => {
+  if (mode === UploadMode.LOCAL) {
+    uploadFileToLocal(req, res, next);
+  } else if (mode === UploadMode.FTP) {
+    ftpUploader.uploadFileOverFTP(req, res, next);
+  } 
+  // else if (mode === UploadMode.SFTP) {
+  //   sftpUploader.uploadFileOverSSH(req, res, next);
+  // }
+};
 
-  uploadFile(buffer, remoteFilePath, callback) {
-    const client = new ftp();
-
-    client.on('ready', () => {
-      client.put(buffer, remoteFilePath, (err) => {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null);
-        }
-        client.end();
-      });
-    });
-
-    client.on('error', (err) => {
-      console.error('FTP connection error:', err);
-      callback(err);
-    });
-
-    client.connect(this.config);
-  }
-
-  changeFileName(filePath, newFileName) {
-    const lastIndex = filePath.lastIndexOf('/');
-    return filePath.substring(0, lastIndex + 1) + newFileName;
-  }
-}
-
-module.exports = FTPUploader;
+module.exports = { uploadFile };
